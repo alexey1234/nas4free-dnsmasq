@@ -1,11 +1,12 @@
 #!/usr/local/bin/php-cgi -f
 <?php
 include ("config.inc");
-$thebrigversion=0;
-$workdir_1 = file("/tmp/thebriginstaller");
+$dnsmasqversion=0;
+$workdir_1 = file("/tmp/dnsmasqinstaller");
 $workdir = trim($workdir_1[0]);
-$langfile = file("{$workdir}/temporary/conf/ext/thebrig/lang.inc");
-$version_1 = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
+$mainfile = file("{$workdir}/temporary/www/extensions_dnsmasq_server.php");
+$version_1 = preg_split ( "/VERSION_NBR, 'v/", $mainfile[1]);
+//here
 $currentversion=substr($version_1[1],0,3);
 if (is_array($config['thebrig'])) {
 		if ($config['thebrig']['rootfolder']) { 
