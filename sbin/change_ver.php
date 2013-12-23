@@ -5,13 +5,13 @@ $dnsmasqversion=0;
 $workdir_1 = file("/tmp/dnsmasqinstaller");
 $workdir = trim($workdir_1[0]);
 $mainfile = file("{$workdir}/temporary/www/extensions_dnsmasq_server.php");
-$version_1 = preg_split ( "/Version/", $mainfile[4]);
+$version_1 = preg_split ( "/Version/", $mainfile[3]);
 $currentversion=substr($version_1[1],0,3);
 if (is_array($config['dnsmasq'])) {
 		if ($config['dnsmasq']['rootfolder']) { 
 			$dnsmasqrootfolder = $config['dnsmasq']['rootfolder'];
 			$installed_file = file($config['dnsmasq']['rootfolder']."www/extensions_dnsmasq_server.php");
-			$version_2 = preg_split ( "/Version/", $installed_file[4]);
+			$version_2 = preg_split ( "/Version/", $installed_file[3]);
 			$installed_version=substr($version_2[1],0,3);
 			if ($installed_version == $currentversion) {
 				$message = "No need updates \n"; 
