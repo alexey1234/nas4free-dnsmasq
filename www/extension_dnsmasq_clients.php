@@ -5,7 +5,7 @@ Version 0.1
 */
 require("auth.inc");
 require("guiconfig.inc");
-include_once ($config['dnsmasq']['rootfolder']."www/function.php");
+include_once ($config['dnsmasq']['rootfolder']."www/function.inc");
 $pgtitle = array(gettext("Extensions"),gettext("DHCP clients table"));
 include("fbegin.inc");?>
 
