@@ -30,5 +30,5 @@ if (is_array($config['dnsmasq'])) {
 	else { $message = "Hello new user, We will install Dnsmasq now \n";
 	file_put_contents("/tmp/dnsmasqversion", "installed"); }
 met1 : echo $message."\n";
-echo $version_2;
+print_r ($version_2);
 ?>
