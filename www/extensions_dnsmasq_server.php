@@ -3,6 +3,7 @@
 extensions_dnsmasq_server.php
 Version 0.1
 */
+ob_start();
 require("auth.inc");
 require("guiconfig.inc");
 include_once ($config['dnsmasq']['rootfolder']."www/function.inc");
