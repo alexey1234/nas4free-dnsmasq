@@ -1,0 +1,188 @@
+<?php
+/* 
+extensions_dnsmasq_server.php
+Version 0.1
+*/
+require("auth.inc");
+require("guiconfig.inc");
+include_once ($config['dnsmasq']['rootfolder']."www/function.php");
+if (!isset($config['dnsmasq']) || !is_array($config['dnsmasq'])) header("Location: extensions_dnsmasq_conf.php");
+if (is_file("/var/run/dnsmasq.reload")) $warnmess = file_get_contents("/var/run/dnsmasq.reload");
+if ($_POST) {
+	if (isset($_POST['Submit']) && ($_POST['Submit'] === "Save")) { 
+		unset($input_errors);
+		if (isset($_POST['enable'])) { 	$config['dnsmasq']['enable'] = TRUE; } else { unset($config['dnsmasq']['enable']); }
+			
+			if (isset($_POST['extconfig']) ) { $config['dnsmasq']['extconfig'] = true;  } else { unset($config['dnsmasq']['extconfig']); }
+			$config['dnsmasq']['logging'] =$_POST['logging'];
+			
+			if (empty($_POST['startadr']) && empty($_POST['endadr'])) { 
+					$warningmess = "Dnsmasq will work as DNS forvarder only, without DHCP and netboot"; 
+					unset($config['dnsmasq']['startadr']); unset($config['dnsmasq']['endadr']); 
+					}
+			    elseif (!empty($_POST['startadr']) && !empty($_POST['endadr'])) {
+					// Input validation
+					$reqdfields = explode(" ", "startadr endadr leasecount");
+					$reqdfieldsn = array(gettext("DHCP range - start"), gettext("DHCP range - end"), gettext("How leases allow"));
+					$reqdfieldst = explode(" ", "ipaddr ipaddr numeric");
+					do_input_validation($_POST, $reqdfields, $reqdfieldsn, $input_errors);
+					do_input_validation_type($_POST, $reqdfields, $reqdfieldsn, $reqdfieldst, $input_errors);
+					if (empty($input_errors)) { $config['dnsmasq']['startadr'] =$_POST['startadr']; $config['dnsmasq']['endadr'] =$_POST['endadr']; /*$config['dnsmasq']['leasetime'] =$_POST['leasetime'];*/$config['dnsmasq']['leasecount'] =$_POST['leasecount'];}
+					else exit;
+					}
+			    else {$input_errors="Something wrong"; exit;}
+			if (isset($_POST['enabletftp']) ) $config['dnsmasq']['enabletftp'] = TRUE; else unset ($config['dnsmasq']['enabletftp']);
+			 $config['dnsmasq']['tftproot'] =  $_POST['tftproot'];
+
+			 if (! empty ($_POST['tftpserver'])) { $config['dnsmasq']['tftpserver'] = $_POST['tftpserver'];} else {
+					if (isset ($config['tftpd']['enable'])) {$config['dnsmasq']['tftpserver'] =  $config['interfaces']['lan']['ipaddr'];} else { unset ($config['dnsmasq']['tftpserver']); }
+					}
+			  if ( !empty($_POST['tftpboot']) && strlen ($_POST['tftpboot']) > 3 ) { $config['dnsmasq']['tftpboot'] =$_POST['tftpboot'];} else {unset ( $config['dnsmasq']['tftpboot']);}
+			  write_config();
+			  // restart dnsmasq  
+			 if (isset ($config['dnsmasq']['enable'])) { $savemsg = ""; $warnmess =""; dnsmasq_config(); rc_restart_service("dnsmasq");	}	else { 	$savemsg = ""; $warnmess =""; rc_stop_service("dnsmasq");}
+			}
+	if (isset($_POST['apply']) && ($_POST['apply'] === "Apply changes")) { 
+		$savemsg = "";
+		$warnmess ="";
+		dnsmasq_config();
+		rc_restart_service("dnsmasq");
+		//$pidrestart = exec ("/bin/sh {$config['dhcplight']['homefolder']}bin/dhcp_light restart");
+		exec ("rm -f /var/run/dnsmasq.reload");
+		// if (is_numeric($pidrestart)) {	$savemsg = gettext("The changes have been applied successfully.");} else {$warnmess = gettext("Something wrong, please refer dhcpd.conf or check DHCP server checkbox"); }
+		}
+}
+$pconfig['enable'] = $config['dnsmasq']['enable'];
+$pconfig['extconfig'] = isset ($config['dnsmasq']['extconfig']) ? true : false;
+$pconfig['logging'] = $config['dnsmasq']['logging'];
+$pconfig['startadr'] = $config['dnsmasq']['startadr'];
+$pconfig['endadr'] = $config['dnsmasq']['endadr'];
+$pconfig['leasecount'] = $config['dnsmasq']['leasecount'];
+//$pconfig['leasetime'] = $config['dnsmasq']['leasetime'];
+$pconfig['tftproot'] = $config['dnsmasq']['tftproot'];
+$pconfig['tftpboot'] = $config['dnsmasq']['tftpboot'];
+$pconfig['enabletftp'] = isset ($config['dnsmasq']['enabletftp']) ? true : false;
+
+
+$pgtitle = array(gettext("Extensions"),gettext("DNSMASQ"));
+include("fbegin.inc");?>
+<style>
+.listhdrr1_dnsmasq_good {
+	background: #BBBBBB url("ext/dnsmasq/gradient_listhdr1_good.png") repeat-x scroll left top;
+	}
+.listhdrr1_dnsmasq_bad {
+	background: #BBBBBB url("ext/dnsmasq/gradient_listhdr1_bad.png") repeat-x scroll left top;
+	}
+.listhdrr1_dnsmasq_good .listhdrr1_dnsmasq_bad {
+	border-right: 1px solid #999999;
+	vertical-align: top;
+	padding-right: 16px;
+	padding-left: 6px;
+	font-weight: bold;
+	border-bottom: 1px solid #999999;
+	font-size: 11px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+.listhdrr1_dnsmasq_good a .listhdrr1_dnsmasq_bad a {
+	color: #000000;
+}
+</style>
+<script type="text/javascript">
+<!--
+function enable_tftp() {
+	switch(document.iform.enabletftp.checked) {
+		case false:
+			showElementById('tftproot_tr','hide');
+			break;
+		case true:
+			showElementById('tftproot_tr','show');
+			break;
+	}
+
+}
+$(document).ready(function () {
+    setInterval(function() {
+        $.get("ext/dnsmasq/extensions_dnsmasq_check.php", function (result) {
+            $('#loaddiv').html(result);
+        });
+    }, 2000);
+});
+
+
+//-->
+</script>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr><td class="tabnavtbl">
+		<ul id="tabnav">
+			<li class="tabact"><a href="extensions_dnsmasq_server.php"><span>Main</span></a></li>
+			
+			<li class="tabinact"><a href="extensions_dnsmasq_conf.php"><span>config</span></a></li>
+			<li class="tabinact"><a href="extensions_dnsmasq_clients.php"><span>Client table</span></a></li>
+			<li id="booting" class="tabinact"><a href="extensions_dnsmasq_log.php"><span>Log</span></a></li>
+			<!--<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li> -->
+					
+		</ul>
+	</td></tr>
+	<tr>
+	<form action="extensions_dnsmasq_server.php" method="post" name="iform" id="iform">
+		<td class="tabcont">
+		<?php if (!empty($input_errors)) print_input_errors($input_errors); ?>
+<?php if ($warnmess) {dnsmasq_warning_box($warnmess); } ?>
+<?php if ($savemsg) {print_info_box($savemsg); $savemsg = ""; } ?>
+			<?php if (is_file("/var/run/dnsmasq.reload"))  print_config_change_box() ?>
+			
+			
+			
+			<table width="100%" border="0" cellpadding="5" cellspacing="0">
+							<!-- <table width="100%" border="0" cellpadding="5" cellspacing="0"> -->
+				<?php html_titleline_checkbox("enable", gettext("Dynamic Host Configuration Protocol"), isset($pconfig['enable']) ? true : false, gettext("Enable"), "enable_change(false)");?>
+				
+				<?php // html_titleline_checkbox("enable", gettext("Dynamic Host Configuration Protocol"), isset($pconfig['enable']) ? true : false, gettext("Enable"), "enable_change(false)");?>
+				
+				<tr>
+					<td width="22%" valign="top" class="vncell"><?=gettext("Hosts");?></td>
+					<td width="78%" class="vtable">
+						<table width="100%" border="0" cellpadding="0" cellspacing="0">
+								<div id="loaddiv"> 
+								</div>
+								
+
+						</table>
+					</td>
+				</tr>
+				<?php html_inputbox("startadr", gettext("DHCP range - start"), $pconfig['startadr'], gettext("Choice start adress for DHCP hosts"), false, 16,false);?>
+				<?php html_inputbox("endadr", gettext("DHCP range - end"), $pconfig['endadr'], gettext("Choice end adress for DHCP hosts"), false, 16,false);?>
+				<?php html_inputbox("leasecount", gettext("How leases allow"), !empty($pconfig['leasecount']) ? $pconfig['leasecount'] : "150", gettext("Set the limit on DHCP leases, the default is 150"), false, 16,false);?>
+				<?php //html_inputbox("leasetime", gettext("Lease time"), $pconfig['leasetime'], gettext("Set the lease time for subnet. Format: 1h = 1 hour , 10m =10 minutes "), false, 16,false);?>
+				<?php //html_filechooser("extconfig", gettext("External config file"), $pconfig['extconfig'], gettext("Define external config file. All server setting will use it instead nas4free config"), $config['dnsmasq']['rootfolder'], false);?>
+				 <?php html_checkbox("extconfig", gettext("Allow external config"), !isset($pconfig['extconfig']) ? true : false, gettext("Allow support for external config files. Config files may have any name, exclude *.bak and placed into <b>".$config['dnsmasq']['rootfolder']."conf</b> folder"),"","","enable_booting(false)");?>
+				  <?php html_combobox("logging", gettext("Log configuration"), $pconfig['logging'], array("mini" => gettext("System only"), "dhcp" => gettext("System+DHCP queries"), "all" => gettext("DNS+DHCP+Systems")), "", false, false, "" );?>
+				  <?php// html_inputbox("tftpserver", gettext("TFTP server"), $pconfig['tftpserver'], gettext("Define TFTP server, IP or server name. Empty line - use Nas4Free <a href=\"/services_tftp.php\">TFTP server</a>"), false, 25,false);?>
+				 <?php html_inputbox("tftpboot", gettext("Boot kernel name"), $pconfig['tftpboot'], gettext("Define first boot kernel name"), false, 60,false);?>
+				 <?php html_separator(); ?>
+				<?php html_titleline_checkbox("enabletftp", gettext("Built-in tftp server"), !empty($pconfig['enabletftp']) ? true : false, gettext("Enable"), "enable_tftp(false)");?>
+					
+					
+					<?php html_filechooser("tftproot", gettext("TFTP root folder"), $pconfig['tftproot'], gettext("Use tftp root folder"), !empty( $pconfig['tftproot']) ? $pconfig['tftproot'] : $config['dnsmasq']['rootfolder'] . "tftproot/", true, 60);?>
+				  <tr><td>
+					<div id="submit">
+					<input name="Submit" type="submit" class="formbtn" value="<?=gettext("Save");?>" />
+					</div>
+				    </td>
+				</tr>
+			
+			</table>
+		</td>
+		<?php include("formend.inc");?>
+		</form>
+	</tr>
+
+	
+</table>
+<script type="text/javascript">
+<!--
+enable_tftp();
+enable_booting();
+//-->
+</script>
+<?php include("fend.inc"); ?>
