@@ -40,6 +40,8 @@ if ($_POST) {
 	$config['dnsmasq']['rootfolder'] = $pconfig['rootfolder'];
 	write_config();
 	unlink_if_exists("/tmp/dnsmasq.tmp");
+	if ( !is_file( "/etc/rc.d/dnsmasq" )) {$cmd = "install -c -o root -g wheel -m 755 ".$config['dnsmasq']['rootfolder']."sbin/dnsmasq.d /etc/rc.d/dnsmasq";  exec($cmd);} else {}
+	if ( !is_link ( "/usr/local/sbin/dnsmasq") ) symlink ( $config['dnsmasq']['rootfolder']."sbin/dnsmasq","/usr/local/sbin/dnsmasq"); else {}
 	header ("Location: /extensions_dnsmasq_server.php");
 	}
 }
