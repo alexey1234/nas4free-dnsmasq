@@ -41,7 +41,7 @@ if ($_POST) {
 			  if ( !empty($_POST['tftpboot']) && strlen ($_POST['tftpboot']) > 3 ) { $config['dnsmasq']['tftpboot'] =$_POST['tftpboot'];} else {unset ( $config['dnsmasq']['tftpboot']);}
 			  write_config();
 			  // restart dnsmasq  
-			 if (isset ($config['dnsmasq']['enable'])) { $savemsg = ""; $warnmess =""; dnsmasq_config(); rc_restart_service("dnsmasq");	}	else { 	$savemsg = ""; $warnmess =""; rc_stop_service("dnsmasq");}
+			 if (isset ($config['dnsmasq']['enable'])) { $savemsg = ""; $warnmess =""; dnsmasq_config(); rc_update_rcconf("dnsmasq", "enable"); rc_restart_service("dnsmasq");	}	else { 	$savemsg = ""; $warnmess =""; rc_stop_service("dnsmasq");}
 			}
 	if (isset($_POST['apply']) && ($_POST['apply'] === "Apply changes")) { 
 		$savemsg = "";
