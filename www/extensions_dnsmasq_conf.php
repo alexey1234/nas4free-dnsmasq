@@ -2,6 +2,7 @@
 /*
 extensions_dnsmasq_conf.php
 */
+ob_start();
 require("auth.inc");
 require("guiconfig.inc");
 if (!isset($config['dnsmasq']) || !is_array($config['dnsmasq'])) $config['dnsmasq']=array();
