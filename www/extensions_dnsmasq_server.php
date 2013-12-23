@@ -5,7 +5,7 @@ Version 0.1
 */
 require("auth.inc");
 require("guiconfig.inc");
-include_once ($config['dnsmasq']['rootfolder']."www/function.php");
+include_once ($config['dnsmasq']['rootfolder']."www/function.inc");
 if (!isset($config['dnsmasq']) || !is_array($config['dnsmasq'])) header("Location: extensions_dnsmasq_conf.php");
 if (is_file("/var/run/dnsmasq.reload")) $warnmess = file_get_contents("/var/run/dnsmasq.reload");
 if ($_POST) {
