@@ -31,7 +31,7 @@ include("fbegin.inc");?>
 				</tr>
 				<tr>
 				  <?php if (is_file( "/var/db/dnsmasq.leases")) $leasefile = file("/var/db/dnsmasq.leases");
-					if ( (count ( $leasefile )) < 1) print "blablabla"; else { 
+					if ( (count ( $leasefile )) < 1) print "No leases"; else { 
 					for ($i=0;  ($i < count ( $leasefile )) ; $i++) {
 					$value = explode (" ",$leasefile[$i]) ;
 					echo "<td width=\"33%\" class=\"listr\">&nbsp;".$value[1]."</td>";
