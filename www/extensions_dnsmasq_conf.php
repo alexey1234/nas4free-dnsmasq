@@ -25,11 +25,27 @@ if ($_POST) {
 	if ( $pconfig['remove'] ) {
 		
 		// we want to remove dnsmasq
-		// dnsmasq_unregister();
-		// Browse back to the main page
+		
+		$i = 0;
+ 		if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
+ 			for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
+ 			if (true == ($cnid = preg_match('/dnsmasq_start/', $config['rc']['postinit']['cmd'][$i]))) unset($config['rc']['postinit']['cmd'][$i]);	else {}
+				} 
+		}
+		foreach ( glob( "{$config['dnsmasq']['rootfolder']}conf/ext/dnsmasq/*.php" ) as $file ) {
+ 			$file = str_replace("{$config['dnsmasq']['rootfolder']}conf/ext/dnsmasq", "/usr/local/www", $file);
+ 			if ( is_link( $file ) ) { unlink( $file ); 	} 
+ 		} 
+		foreach ( glob( "/usr/local/www/ext/dnsmasq/*" ) as $file ) { unlink( $file ); 	}
+		if ( is_dir( "/usr/local/www/ext/dnsmasq/" ) ) {  rmdir( "/usr/local/www/ext/dnsmasq/" );  	}
+		if ( is_link( "/usr/local/sbin/dnsmasq" ) ) unlink( "/usr/local/sbin/dnsmasq" ); else {}	
+		if ( is_file( "/etc/rc.d/dnsmasq" ) ) unlink( "/etc/rc.d/dnsmasq" ); else {}
+		unset ($config['dnsmasq']);
+		write_config();
+				// Browse back to the main page
 		header("Location: /");
 		exit;
-		}
+	}
 	else { 
 		if ( $pconfig['rootfolder'][strlen($pconfig['rootfolder'])-1] != "/")  { $pconfig['rootfolder'] = $pconfig['rootfolder'] . "/"; } else {}
 		if ( !is_dir( $pconfig['rootfolder'] ) && !isset($pconfig['remove']) ) {  $input_errors[] = "Not existent folder"; 	}
