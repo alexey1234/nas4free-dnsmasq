@@ -17,27 +17,27 @@ if ($_POST) {
 			if (isset($_POST['extconfig']) ) { $config['dnsmasq']['extconfig'] = true;  } else { unset($config['dnsmasq']['extconfig']); }
 			$config['dnsmasq']['logging'] =$_POST['logging'];
 			
-			if (empty($_POST['startadr']) && empty($_POST['endadr'])) { 
+			if (empty($_POST['startadr']) || empty($_POST['endadr'])) { 
 					$warningmess = "Dnsmasq will work as DNS forvarder only, without DHCP and netboot"; 
 					unset($config['dnsmasq']['startadr']); unset($config['dnsmasq']['endadr']); 
 					}
-			    elseif (!empty($_POST['startadr']) && !empty($_POST['endadr'])) {
+			    else {
 					// Input validation
 					$reqdfields = explode(" ", "startadr endadr leasecount");
 					$reqdfieldsn = array(gettext("DHCP range - start"), gettext("DHCP range - end"), gettext("How leases allow"));
 					$reqdfieldst = explode(" ", "ipaddr ipaddr numeric");
 					do_input_validation($_POST, $reqdfields, $reqdfieldsn, $input_errors);
 					do_input_validation_type($_POST, $reqdfields, $reqdfieldsn, $reqdfieldst, $input_errors);
-					if (empty($input_errors)) { $config['dnsmasq']['startadr'] =$_POST['startadr']; $config['dnsmasq']['endadr'] =$_POST['endadr']; /*$config['dnsmasq']['leasetime'] =$_POST['leasetime'];*/$config['dnsmasq']['leasecount'] =$_POST['leasecount'];}
-					else exit;
 					}
-			    else {$input_errors="Something wrong"; exit;}
+					
+					if (empty($input_errors)) { 
+					if ( isset($_POST['startadr']) &&  ($_POST['endadr'])) {
+					$config['dnsmasq']['startadr'] =$_POST['startadr']; $config['dnsmasq']['endadr'] =$_POST['endadr']; $config['dnsmasq']['leasecount'] =$_POST['leasecount'];} else {}
+										
+			    
 			if (isset($_POST['enabletftp']) ) $config['dnsmasq']['enabletftp'] = TRUE; else unset ($config['dnsmasq']['enabletftp']);
 			 $config['dnsmasq']['tftproot'] =  $_POST['tftproot'];
 
-			 if (! empty ($_POST['tftpserver'])) { $config['dnsmasq']['tftpserver'] = $_POST['tftpserver'];} else {
-					if (isset ($config['tftpd']['enable'])) {$config['dnsmasq']['tftpserver'] =  $config['interfaces']['lan']['ipaddr'];} else { unset ($config['dnsmasq']['tftpserver']); }
-					}
 			  if ( !empty($_POST['tftpboot']) && strlen ($_POST['tftpboot']) > 3 ) { $config['dnsmasq']['tftpboot'] =$_POST['tftpboot'];} else {unset ( $config['dnsmasq']['tftpboot']);}
 			  write_config();
 			  // restart dnsmasq  
@@ -52,6 +52,7 @@ if ($_POST) {
 		exec ("rm -f /var/run/dnsmasq.reload");
 		// if (is_numeric($pidrestart)) {	$savemsg = gettext("The changes have been applied successfully.");} else {$warnmess = gettext("Something wrong, please refer dhcpd.conf or check DHCP server checkbox"); }
 		}
+	}
 }
 $pconfig['enable'] = $config['dnsmasq']['enable'];
 $pconfig['extconfig'] = isset ($config['dnsmasq']['extconfig']) ? true : false;
@@ -64,7 +65,7 @@ $pconfig['tftproot'] = $config['dnsmasq']['tftproot'];
 $pconfig['tftpboot'] = $config['dnsmasq']['tftpboot'];
 $pconfig['enabletftp'] = isset ($config['dnsmasq']['enabletftp']) ? true : false;
 
-
+out:
 $pgtitle = array(gettext("Extensions"),gettext("DNSMASQ"));
 include("fbegin.inc");?>
 <style>
