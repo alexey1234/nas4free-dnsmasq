@@ -9,7 +9,7 @@ How to use
 1. Fetch installer 
    fetch https://raw.github.com/alexey1234/nas4free-dnsmasq/master/dnsmasq_install.sh
 
-2. Type command
-   sh dnsmasq_install.sh /path/to/extension/folder
+2. Type command:
+  <p>sh dnsmasq_install.sh /path/to/extension/folder
 
 3. Observe webgui
