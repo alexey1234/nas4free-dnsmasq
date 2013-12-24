@@ -30,10 +30,11 @@ switch ($config['dnsmasq']['logging']) {
 		      fwrite ($handle, "log-dhcp\n");
 			break;
 	}
+if (isset( $config['dnsmasq']['startadr']) && isset( $config['dnsmasq']['endadr'])) {	fwrite ($handle, "dhcp-range=".$config['dnsmasq']['startadr'].",".$config['dnsmasq']['endadr'].",".$config['dnsmasq']['leasetime']."m\n" );
+fwrite ($handle, "dhcp-lease-max=".$config['dnsmasq']['leasecount']."\n" );} else {}
 fwrite ($handle, "dhcp-range=".$config['dnsmasq']['startadr'].",".$config['dnsmasq']['endadr'].",".$config['dnsmasq']['leasetime']."m\n" );
 if (isset( $config['dnsmasq']['enabletftp'])) { fwrite ($handle, "enable-tftp\n" );  fwrite ($handle, "tftp-root=".$config['dnsmasq']['rootfolder']."tftproot\n" ); } else { }
 if (isset( $config['dnsmasq']['tftpboot'])) { fwrite ($handle, "dhcp-boot=".$config['dnsmasq']['tftpboot']."\n" );} else { }
-fwrite ($handle, "dhcp-lease-max=".$config['dnsmasq']['leasecount']."\n" );
  // Hosts
  If (is_array($dnsmasqhosts)) { 
 array_sort_key($dnsmasqhosts, "hostno");
