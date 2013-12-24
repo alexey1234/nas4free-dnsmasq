@@ -9,7 +9,7 @@ How to use
 <p>1. Fetch installer 
 <p>fetch https://raw.github.com/alexey1234/nas4free-dnsmasq/master/dnsmasq_install.sh
 
-2. Type command: 
+<p>2. Type command: 
 <p>sh dnsmasq_install.sh /path/to/extension/folder
 
-3. Observe webgui
+<p>3. Observe webgui
