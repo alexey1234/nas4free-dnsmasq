@@ -185,7 +185,7 @@ function dnsmasq_get_next_hostno() {
 }
 
 out:
-$pgtitle = array(gettext("Extensions"),gettext("DNSMASQ|subnet"));
+$pgtitle = array(gettext("Extensions"),gettext("Dnsmasq|Host"));
 include("fbegin.inc");
 
 ?>
