@@ -29,7 +29,7 @@ if ($_POST) {
 		$i = 0;
  		if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
  			for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
- 			if (true == ($cnid = preg_match('/dnsmasq_start/', $config['rc']['postinit']['cmd'][$i]))) unset($config['rc']['postinit']['cmd'][$i]);	else {}
+ 			if (true == ($cnid = preg_match('/start_dnsmasq/', $config['rc']['postinit']['cmd'][$i]))) unset($config['rc']['postinit']['cmd'][$i]);	else {}
 				} 
 		}
 		foreach ( glob( "{$config['dnsmasq']['rootfolder']}conf/ext/dnsmasq/*.php" ) as $file ) {
@@ -58,7 +58,7 @@ if ($_POST) {
 	$i = 0;
 	if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
 		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
-			if (false == ($cnid = preg_match('/dnsmasq_start/', $config['rc']['postinit']['cmd'][$i]))) {} else { break;}			
+			if (false == ($cnid = preg_match('/start_dnsmasq/', $config['rc']['postinit']['cmd'][$i]))) {} else { break;}			
 		 	}
 			$config['rc']['postinit']['cmd'][$i] = "/usr/local/bin/php-cgi {$config['dnsmasq']['rootfolder']}sbin/dnsmasq_start.php";
 		} 
