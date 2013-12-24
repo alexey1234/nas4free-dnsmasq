@@ -51,7 +51,7 @@ if ($_POST) {
 		 	}	
 		} 
 	// update the value of the postinit command.
-	$config['rc']['postinit']['cmd'][$i] = "/usr/local/bin/php-cgi {$config[''dnsmasq']['rootfolder']}sbin/dnsmasq_start.php";
+	$config['rc']['postinit']['cmd'][$i] = "/usr/local/bin/php-cgi {$config['dnsmasq']['rootfolder']}sbin/dnsmasq_start.php";
 	header ("Location: /extensions_dnsmasq_server.php");
 	}
 }
