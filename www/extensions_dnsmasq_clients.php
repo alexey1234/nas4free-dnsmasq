@@ -24,14 +24,15 @@ include("fbegin.inc");?>
 	<tr>
 		<td class="tabcont">
 			<table width="100%" border="0" cellpadding="5" cellspacing="0">
+			 <?php if (is_file( "/var/db/dnsmasq.leases")) $leasefile = file("/var/db/dnsmasq.leases");
+					if ( (count ( $leasefile )) < 1) print "No leases"; else { ?>
 				<tr>
 					<td width="33%" class="listhdrlr">&nbsp;MAC address</td>
 					<td width="33%" class="listhdrlr">&nbsp;IP address</td>
 					<td width="33%" class="listhdrlr">&nbsp;Host name</td>
 				</tr>
 				<tr>
-				  <?php if (is_file( "/var/db/dnsmasq.leases")) $leasefile = file("/var/db/dnsmasq.leases");
-					if ( (count ( $leasefile )) < 1) print "No leases"; else { 
+				 <?php
 					for ($i=0;  ($i < count ( $leasefile )) ; $i++) {
 					$value = explode (" ",$leasefile[$i]) ;
 					echo "<td width=\"33%\" class=\"listr\">&nbsp;".$value[1]."</td>";
