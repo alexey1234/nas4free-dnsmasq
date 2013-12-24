@@ -6,7 +6,7 @@ simple dhcp and dns forvarder
 This webgui extension add to NAS4Free server popular DNS forvarder and dhcp server DNSMASQ 
 
 How to use
-1. Fetch installer <p>fetch https://raw.github.com/alexey1234/nas4free-dnsmasq/master/dnsmasq_install.sh
+<p>1. Fetch installer <p>fetch https://raw.github.com/alexey1234/nas4free-dnsmasq/master/dnsmasq_install.sh
 
 2. Type command: <p>sh dnsmasq_install.sh /path/to/extension/folder
 
