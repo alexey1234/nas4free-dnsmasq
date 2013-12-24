@@ -42,6 +42,16 @@ if ($_POST) {
 	unlink_if_exists("/tmp/dnsmasq.tmp");
 	if ( !is_file( "/etc/rc.d/dnsmasq" )) {$cmd = "install -c -o root -g wheel -m 755 ".$config['dnsmasq']['rootfolder']."sbin/dnsmasq.d /etc/rc.d/dnsmasq";  exec($cmd);} else {}
 	if ( !is_link ( "/usr/local/sbin/dnsmasq") ) symlink ( $config['dnsmasq']['rootfolder']."sbin/dnsmasq","/usr/local/sbin/dnsmasq"); else {}
+	// Add startup command
+	$i = 0;
+	if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
+		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
+			if (preg_match('/dnsmasq_start\.php/', $config['rc']['postinit']['cmd'][$i]))
+				unset($config['rc']['postinit']['cmd'][$i]);	// Disable the old startup
+		 	}	
+		} 
+	// update the value of the postinit command.
+	$config['rc']['postinit']['cmd'][$i] = "/usr/local/bin/php-cgi {$config[''dnsmasq']['rootfolder']}sbin/dnsmasq_start.php";
 	header ("Location: /extensions_dnsmasq_server.php");
 	}
 }
