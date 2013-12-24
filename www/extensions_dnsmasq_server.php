@@ -49,10 +49,8 @@ if ($_POST) {
 		$warnmess ="";
 		dnsmasq_config();
 		rc_restart_service("dnsmasq");
-		//$pidrestart = exec ("/bin/sh {$config['dhcplight']['homefolder']}bin/dhcp_light restart");
-		exec ("rm -f /var/run/dnsmasq.reload");
-		// if (is_numeric($pidrestart)) {	$savemsg = gettext("The changes have been applied successfully.");} else {$warnmess = gettext("Something wrong, please refer dhcpd.conf or check DHCP server checkbox"); }
-		}
+		unlink ("/var/run/dnsmasq.reload");
+	}
 	
 }
 $pconfig['enable'] = $config['dnsmasq']['enable'];
@@ -118,12 +116,9 @@ $(document).ready(function () {
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
 			<li class="tabact"><a href="extensions_dnsmasq_server.php"><span>Main</span></a></li>
-			
 			<li class="tabinact"><a href="extensions_dnsmasq_conf.php"><span>config</span></a></li>
 			<li class="tabinact"><a href="extensions_dnsmasq_clients.php"><span>Client table</span></a></li>
-			<li id="booting" class="tabinact"><a href="extensions_dnsmasq_log.php"><span>Log</span></a></li>
-			<!--<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li> -->
-					
+			<li id="tabinact" class="tabinact"><a href="extensions_dnsmasq_log.php"><span>Log</span></a></li>
 		</ul>
 	</td></tr>
 	<tr>
@@ -156,18 +151,13 @@ $(document).ready(function () {
 				<?php html_inputbox("startadr", gettext("DHCP range - start"), $pconfig['startadr'], gettext("Choice start adress for DHCP hosts"), false, 16,false);?>
 				<?php html_inputbox("endadr", gettext("DHCP range - end"), $pconfig['endadr'], gettext("Choice end adress for DHCP hosts"), false, 16,false);?>
 				<?php html_inputbox("leasecount", gettext("How leases allow"), !empty($pconfig['leasecount']) ? $pconfig['leasecount'] : "150", gettext("Set the limit on DHCP leases, the default is 150"), false, 16,false);?>
-				<?php //html_inputbox("leasetime", gettext("Lease time"), $pconfig['leasetime'], gettext("Set the lease time for subnet. Format: 1h = 1 hour , 10m =10 minutes "), false, 16,false);?>
-				<?php //html_filechooser("extconfig", gettext("External config file"), $pconfig['extconfig'], gettext("Define external config file. All server setting will use it instead nas4free config"), $config['dnsmasq']['rootfolder'], false);?>
-				 <?php html_checkbox("extconfig", gettext("Allow external config"), !isset($pconfig['extconfig']) ? true : false, gettext("Allow support for external config files. Config files may have any name, exclude *.bak and placed into <b>".$config['dnsmasq']['rootfolder']."conf</b> folder"),"","","enable_booting(false)");?>
-				  <?php html_combobox("logging", gettext("Log configuration"), $pconfig['logging'], array("mini" => gettext("System only"), "dhcp" => gettext("System+DHCP queries"), "all" => gettext("DNS+DHCP+Systems")), "", false, false, "" );?>
-				  <?php// html_inputbox("tftpserver", gettext("TFTP server"), $pconfig['tftpserver'], gettext("Define TFTP server, IP or server name. Empty line - use Nas4Free <a href=\"/services_tftp.php\">TFTP server</a>"), false, 25,false);?>
-				 <?php html_inputbox("tftpboot", gettext("Boot kernel name"), $pconfig['tftpboot'], gettext("Define first boot kernel name"), false, 60,false);?>
-				 <?php html_separator(); ?>
+				<?php html_checkbox("extconfig", gettext("Allow external config"), !isset($pconfig['extconfig']) ? true : false, gettext("Allow support for external config files. Config files may have any name, exclude *.bak and placed into <b>".$config['dnsmasq']['rootfolder']."conf</b> folder"),"","","enable_booting(false)");?>
+				<?php html_combobox("logging", gettext("Log configuration"), $pconfig['logging'], array("mini" => gettext("System only"), "dhcp" => gettext("System+DHCP queries"), "all" => gettext("DNS+DHCP+Systems")), "", false, false, "" );?>
+				<?php html_inputbox("tftpboot", gettext("Boot kernel name"), $pconfig['tftpboot'], gettext("Define first boot kernel name"), false, 60,false);?>
+				<?php html_separator(); ?>
 				<?php html_titleline_checkbox("enabletftp", gettext("Built-in tftp server"), !empty($pconfig['enabletftp']) ? true : false, gettext("Enable"), "enable_tftp(false)");?>
-					
-					
-					<?php html_filechooser("tftproot", gettext("TFTP root folder"), $pconfig['tftproot'], gettext("Use tftp root folder"), !empty( $pconfig['tftproot']) ? $pconfig['tftproot'] : $config['dnsmasq']['rootfolder'] . "tftproot/", true, 60);?>
-				  <tr><td>
+				<?php html_filechooser("tftproot", gettext("TFTP root folder"), $pconfig['tftproot'], gettext("Use tftp root folder"), !empty( $pconfig['tftproot']) ? $pconfig['tftproot'] : $config['dnsmasq']['rootfolder'] . "tftproot/", true, 60);?>
+				<tr><td>
 					<div id="submit">
 					<input name="Submit" type="submit" class="formbtn" value="<?=gettext("Save");?>" />
 					</div>
