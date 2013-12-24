@@ -43,6 +43,7 @@ if ($_POST) {
 			  // restart dnsmasq  
 			 if (isset ($config['dnsmasq']['enable'])) { $savemsg = ""; $warnmess =""; dnsmasq_config(); rc_update_rcconf("dnsmasq", "enable"); rc_restart_service("dnsmasq");	}	else { 	$savemsg = ""; $warnmess =""; rc_stop_service("dnsmasq");}
 			}
+	}
 	if (isset($_POST['apply']) && ($_POST['apply'] === "Apply changes")) { 
 		$savemsg = "";
 		$warnmess ="";
@@ -52,7 +53,7 @@ if ($_POST) {
 		exec ("rm -f /var/run/dnsmasq.reload");
 		// if (is_numeric($pidrestart)) {	$savemsg = gettext("The changes have been applied successfully.");} else {$warnmess = gettext("Something wrong, please refer dhcpd.conf or check DHCP server checkbox"); }
 		}
-	}
+	
 }
 $pconfig['enable'] = $config['dnsmasq']['enable'];
 $pconfig['extconfig'] = isset ($config['dnsmasq']['extconfig']) ? true : false;
