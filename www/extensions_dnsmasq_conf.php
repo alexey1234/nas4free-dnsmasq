@@ -60,7 +60,7 @@ if ($_POST) {
 		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
 			if (false == ($cnid = preg_match('/start_dnsmasq/', $config['rc']['postinit']['cmd'][$i]))) {} else { break;}			
 		 	}
-			$config['rc']['postinit']['cmd'][$i] = "/usr/local/bin/php-cgi {$config['dnsmasq']['rootfolder']}sbin/dnsmasq_start.php";
+			$config['rc']['postinit']['cmd'][$i] = "/usr/local/bin/php-cgi {$config['dnsmasq']['rootfolder']}sbin/start_dnsmasq.php";
 		} 
 	write_config();
 	unlink_if_exists("/tmp/dnsmasq.tmp");
