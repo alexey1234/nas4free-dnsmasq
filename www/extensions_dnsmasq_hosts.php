@@ -29,30 +29,6 @@ $cnid = array_search_ex($number, $config['dnsmasq']['hosts'], "uuid");
 		// write_dhcpconf($dhcpd_conf, $config['dhcplight']['homefolder']."conf/dhcpd.conf");
 		header("Location: extensions_dnsmasq_server.php");
 		}
-
-
-if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_hosts, "uuid")))) {
-	$pconfig['uuid'] = $a_hosts[$cnid]['uuid'];
-	$pconfig['macaddr'] = $a_hosts[$cnid]['macaddr'];
-	$pconfig['ipadress'] = $a_hosts[$cnid]['ipadress'];
-	$pconfig['hostname'] = $a_hosts[$cnid]['hostname'];
-	$pconfig['leasetime'] = $a_hosts[$cnid]['leasetime'];
-	
-	$pconfig['hostno'] = $a_hosts[$cnid]['hostno'];
-	}
-else {
-	$pconfig['uuid'] = uuid();
-	$pconfig['macaddr'] = "";
-	$pconfig['ipadress'] = "";
-	$pconfig['hostname'] = "";
-	$pconfig['leasetime'] = "60";
-	
-	$pconfig['hostno'] = dnsmasq_get_next_hostno();
-	}
-	
-
-
-
 If ($_POST) {
 
 	unset($input_errors);
@@ -68,6 +44,8 @@ $pconfig = $_POST;
 		
 		do_input_validation($_POST, $reqdfields, $reqdfieldsn, $input_errors);
 		do_input_validation_type($_POST, $reqdfields, $reqdfieldsn, $reqdfieldst, $input_errors);
+		$subnet = $config['interfaces']['lan']['ipaddr']."/".$config['interfaces']['lan']['subnet'];
+		if (is_ipaddr ($_POST['ipadress'])) { if (false == ($cnif =ip_in_subnet($_POST['ipadress'] ,$subnet))) {$input_errors[] = "Value \"IP address\" is not belongs to the subnet LAN"; goto out;} else {} }
 		$nas4frehosts = &$config['system']['hosts'];
 		if (false !==($cnid = array_search_ex($_POST['hostname'],$nas4frehosts,"name"))) { $warning_mess="Host defined on <a href=system_hosts.php>/etc/hosts</a>. I clear entries MAC and IP adress and make leasetime <b>infinite</b>";
 		if (  $_POST['hostname'] == $config['system']['hostname'] ) {$input_errors[] = "You can not define main host as DHCP client"; goto out;} else {
@@ -119,6 +97,9 @@ $warning_mess="Host NOT defined on <a href=system_hosts.php>/etc/hosts</a>, If y
 		
 		do_input_validation($_POST, $reqdfields, $reqdfieldsn, $input_errors);
 		do_input_validation_type($_POST, $reqdfields, $reqdfieldsn, $reqdfieldst, $input_errors);
+		$subnet = $config['interfaces']['lan']['ipaddr']."/".$config['interfaces']['lan']['subnet'];
+		if (is_ipaddr ($_POST['ipadress'])) { 
+				if (false == ($cnif =ip_in_subnet($_POST['ipadress'],$subnet))) {$input_errors[] = "Value \"IP address\" is not belongs to the subnet LAN"; goto out;} else {} }
 		} 
 // Only hostname.  Need entry to /etc/hosts
       	elseif   ( empty($_POST['macaddr']) &&  empty($_POST['ipadress']) && !empty($_POST['hostname'] )) { 
@@ -170,7 +151,24 @@ $warning_mess="Host NOT defined on <a href=system_hosts.php>/etc/hosts</a>, If y
 	}
 }	
 }
-
+if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_hosts, "uuid")))) {
+	$pconfig['uuid'] = $a_hosts[$cnid]['uuid'];
+	$pconfig['macaddr'] = $a_hosts[$cnid]['macaddr'];
+	$pconfig['ipadress'] = $a_hosts[$cnid]['ipadress'];
+	$pconfig['hostname'] = $a_hosts[$cnid]['hostname'];
+	$pconfig['leasetime'] = $a_hosts[$cnid]['leasetime'];
+	
+	$pconfig['hostno'] = $a_hosts[$cnid]['hostno'];
+	}
+else {
+	$pconfig['uuid'] = uuid();
+	$pconfig['macaddr'] = "";
+	$pconfig['ipadress'] = "";
+	$pconfig['hostname'] = "";
+	$pconfig['leasetime'] = "60";
+	
+	$pconfig['hostno'] = dnsmasq_get_next_hostno();
+	}
 
 function dnsmasq_get_next_hostno() {
 	global $config;
