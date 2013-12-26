@@ -44,6 +44,10 @@ $pconfig = $_POST;
 		
 		do_input_validation($_POST, $reqdfields, $reqdfieldsn, $input_errors);
 		do_input_validation_type($_POST, $reqdfields, $reqdfieldsn, $reqdfieldst, $input_errors);
+		if (is_macaddr($_POST['macaddr'])) {
+			if ( is_array ($a_hosts)) {  
+			$index = array_search_ex($_POST['macaddr'], $a_hosts, "macaddr");	
+			if ( FALSE !==  ($index = array_search_ex($_POST['macaddr'], $a_hosts, "macaddr"))) { $input_errors[] = "MAC adress exist. It must be unique"; goto out;} else {} } else {} }  
 		$subnet = $config['interfaces']['lan']['ipaddr']."/".$config['interfaces']['lan']['subnet'];
 		if (is_ipaddr ($_POST['ipadress'])) { if (false == ($cnif =ip_in_subnet($_POST['ipadress'] ,$subnet))) {$input_errors[] = "Value \"IP address\" is not belongs to the subnet LAN"; goto out;} else {} }
 		$nas4frehosts = &$config['system']['hosts'];
@@ -97,6 +101,10 @@ $warning_mess="Host NOT defined on <a href=system_hosts.php>/etc/hosts</a>, If y
 		
 		do_input_validation($_POST, $reqdfields, $reqdfieldsn, $input_errors);
 		do_input_validation_type($_POST, $reqdfields, $reqdfieldsn, $reqdfieldst, $input_errors);
+		if (is_macaddr($_POST['macaddr'])) {
+			if ( is_array ($a_hosts)) {  
+			$index = array_search_ex($_POST['macaddr'], $a_hosts, "macaddr");	
+			if ( FALSE !==  ($index = array_search_ex($_POST['macaddr'], $a_hosts, "macaddr"))) { $input_errors[] = "MAC adress exist. It must be unique"; goto out;} else {} } else {} }  
 		$subnet = $config['interfaces']['lan']['ipaddr']."/".$config['interfaces']['lan']['subnet'];
 		if (is_ipaddr ($_POST['ipadress'])) { 
 				if (false == ($cnif =ip_in_subnet($_POST['ipadress'],$subnet))) {$input_errors[] = "Value \"IP address\" is not belongs to the subnet LAN"; goto out;} else {} }
