@@ -17,6 +17,7 @@ if ( !isset($config['dnsmasq']['hosts']) || !is_array($config['dnsmasq']['hosts'
 
 array_sort_key($config['dnsmasq']['hosts'], "hostno");
 $a_hosts = &$config['dnsmasq']['hosts'];
+if ($_GET) {
 if (isset($_GET['act']) && ($_GET['act'] === "del")) {
 		$number = $_GET['uuid'];
 $cnid = array_search_ex($number, $config['dnsmasq']['hosts'], "uuid");
@@ -29,6 +30,28 @@ $cnid = array_search_ex($number, $config['dnsmasq']['hosts'], "uuid");
 		// write_dhcpconf($dhcpd_conf, $config['dhcplight']['homefolder']."conf/dhcpd.conf");
 		header("Location: extensions_dnsmasq_server.php");
 		}
+if (isset($_GET['act']) && ($_GET['act'] === "edit")) { $uuid = $_GET['uuid'];
+
+if (FALSE !== ($cnid = array_search_ex($uuid, $a_hosts, "uuid"))) {
+	$pconfig['uuid'] = $a_hosts[$cnid]['uuid'];
+	$pconfig['macaddr'] = $a_hosts[$cnid]['macaddr'];
+	$pconfig['ipadress'] = $a_hosts[$cnid]['ipadress'];
+	$pconfig['hostname'] = $a_hosts[$cnid]['hostname'];
+	$pconfig['leasetime'] = $a_hosts[$cnid]['leasetime'];
+	$pconfig['mode'] = "edit";
+	$pconfig['hostno'] = $a_hosts[$cnid]['hostno'];
+	}
+	}
+else {
+	$pconfig['uuid'] = uuid();
+	$pconfig['macaddr'] = "";
+	$pconfig['ipadress'] = "";
+	$pconfig['hostname'] = "";
+	$pconfig['leasetime'] = "60";
+	$pconfig['mode'] = "new";
+	$pconfig['hostno'] = dnsmasq_get_next_hostno();
+	}
+}	
 If ($_POST) {
 
 	unset($input_errors);
@@ -44,14 +67,15 @@ $pconfig = $_POST;
 		
 		do_input_validation($_POST, $reqdfields, $reqdfieldsn, $input_errors);
 		do_input_validation_type($_POST, $reqdfields, $reqdfieldsn, $reqdfieldst, $input_errors);
+		if ($_POST['mode'] == "new") {
 		if (is_macaddr($_POST['macaddr'])) {
 			if ( is_array ($a_hosts)) {  
 			$index = array_search_ex($_POST['macaddr'], $a_hosts, "macaddr");	
-			if ( FALSE !==  ($index = array_search_ex($_POST['macaddr'], $a_hosts, "macaddr"))) { $input_errors[] = "MAC adress exist. It must be unique"; goto out;} else {} } else {} }  
+			if ( FALSE !==  ($index = array_search_ex($_POST['macaddr'], $a_hosts, "macaddr"))) { $input_errors[] = "MAC adress exist. It must be unique"; goto out;} else {} } else {} } } 
 		$subnet = $config['interfaces']['lan']['ipaddr']."/".$config['interfaces']['lan']['subnet'];
 		if (is_ipaddr ($_POST['ipadress'])) { if (false == ($cnif =ip_in_subnet($_POST['ipadress'] ,$subnet))) {$input_errors[] = "Value \"IP address\" is not belongs to the subnet LAN"; goto out;} else {} }
 		$nas4frehosts = &$config['system']['hosts'];
-		if (false !==($cnid = array_search_ex($_POST['hostname'],$nas4frehosts,"name"))) { $warning_mess="Host defined on <a href=system_hosts.php>/etc/hosts</a>. I clear entries MAC and IP adress and make leasetime <b>infinite</b>";
+		if (false !==($cnin = array_search_ex($_POST['hostname'],$nas4frehosts,"name"))) { $warning_mess="Host defined on <a href=system_hosts.php>/etc/hosts</a>. I clear entries MAC and IP adress and make leasetime <b>infinite</b>";
 		if (  $_POST['hostname'] == $config['system']['hostname'] ) {$input_errors[] = "You can not define main host as DHCP client"; goto out;} else {
 		$pconfig['ipadress'] ="";
 		$pconfig['leasetime'] ="infinite";
@@ -79,7 +103,7 @@ $warning_mess="Host NOT defined on <a href=system_hosts.php>/etc/hosts</a>, If y
 		      do_input_validation_type($_POST, $reqdfields, $reqdfieldsn, $reqdfieldst, $input_errors); 
 		      
 			$nas4frehosts = &$config['system']['hosts'];
-			if (false !==($cnid = array_search_ex($_POST['hostname'],$nas4frehosts,"name"))) { 
+			if (false !==($cnif = array_search_ex($_POST['hostname'],$nas4frehosts,"name"))) { 
 				if (  $_POST['hostname'] == $config['system']['hostname'] ) {$input_errors[] = "You can not define main host as DHCP client"; goto out;} else {
 					$pconfig['ipadress'] ="";
 					$warning_mess="Host defined on <a href=system_hosts.php>/etc/hosts</a>. I  clear IP entry "; }
@@ -101,10 +125,11 @@ $warning_mess="Host NOT defined on <a href=system_hosts.php>/etc/hosts</a>, If y
 		
 		do_input_validation($_POST, $reqdfields, $reqdfieldsn, $input_errors);
 		do_input_validation_type($_POST, $reqdfields, $reqdfieldsn, $reqdfieldst, $input_errors);
+		if ($_POST['mode'] == "new") {
 		if (is_macaddr($_POST['macaddr'])) {
 			if ( is_array ($a_hosts)) {  
 			$index = array_search_ex($_POST['macaddr'], $a_hosts, "macaddr");	
-			if ( FALSE !==  ($index = array_search_ex($_POST['macaddr'], $a_hosts, "macaddr"))) { $input_errors[] = "MAC adress exist. It must be unique"; goto out;} else {} } else {} }  
+			if ( FALSE !==  ($index = array_search_ex($_POST['macaddr'], $a_hosts, "macaddr"))) { $input_errors[] = "MAC adress exist. It must be unique"; goto out;} else {} } else {} }  }
 		$subnet = $config['interfaces']['lan']['ipaddr']."/".$config['interfaces']['lan']['subnet'];
 		if (is_ipaddr ($_POST['ipadress'])) { 
 				if (false == ($cnif =ip_in_subnet($_POST['ipadress'],$subnet))) {$input_errors[] = "Value \"IP address\" is not belongs to the subnet LAN"; goto out;} else {} }
@@ -113,9 +138,9 @@ $warning_mess="Host NOT defined on <a href=system_hosts.php>/etc/hosts</a>, If y
       	elseif   ( empty($_POST['macaddr']) &&  empty($_POST['ipadress']) && !empty($_POST['hostname'] )) { 
 		  if (FALSE == is_hostname($_POST['hostname'])) {$input_errors[] = "Wrong Host name."; goto out;} 
 		  else {
-			$pconfig['leasetime'] ="infinite";
+			$pconfig['leasetime'] ="60";
 			$nas4frehosts = &$config['system']['hosts'];
-			if (false !==($cnid = array_search_ex($_POST['hostname'],$nas4frehosts,"name"))) { $warning_mess="Host defined on <a href=system_hosts.php>/etc/hosts</a>";}
+			if (false !==($cnin = array_search_ex($_POST['hostname'],$nas4frehosts,"name"))) { $warning_mess="Host defined on <a href=system_hosts.php>/etc/hosts</a>";}
 			else { 
 			      if (  $_POST['hostname'] == $config['system']['hostname'] ) {$input_errors[] = "You can not define main host as DHCP client"; goto out;} else {
 			      $warning_mess="Host NOT defined on <a href=system_hosts.php>/etc/hosts</a>, please define it";	} 
@@ -126,14 +151,15 @@ $warning_mess="Host NOT defined on <a href=system_hosts.php>/etc/hosts</a>, If y
 
 	
 	if (empty($input_errors)) {
-	
+	$cnid = array_search_ex($pconfig['uuid'], $config['dnsmasq']['hosts'], "uuid");
+	///  PROBLEM
 		$index = array_search_ex($pconfig['hostno'], $a_hosts, "hostno");	
 	if ( FALSE !== $index ) {
 			if (isset($uuid) && (FALSE !== $cnid )){
 				if ( $cnid < $index ){  for ( $i = $cnid; $i <= $index ; $i++ ){ $a_hosts[$i]['hostno'] -= 1; } 	} 
 				elseif ( $cnid > $index ) {  for ( $i = $index; $i < $cnid ; $i++ ){	$a_hosts[$i]['hostno'] += 1;	} } 
 			} 
-			else {  for ( $i = $index; $i < count( $a_jail ); $i++ ){ $a_hosts[$i]['hostno'] += 1; } } 
+			else {  for ( $i = $index; $i < count( $a_hosts ); $i++ ){ $a_hosts[$i]['hostno'] += 1; } } 
 		} 
 	$hosts = array();
 	
@@ -159,24 +185,7 @@ $warning_mess="Host NOT defined on <a href=system_hosts.php>/etc/hosts</a>, If y
 	}
 }	
 }
-if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_hosts, "uuid")))) {
-	$pconfig['uuid'] = $a_hosts[$cnid]['uuid'];
-	$pconfig['macaddr'] = $a_hosts[$cnid]['macaddr'];
-	$pconfig['ipadress'] = $a_hosts[$cnid]['ipadress'];
-	$pconfig['hostname'] = $a_hosts[$cnid]['hostname'];
-	$pconfig['leasetime'] = $a_hosts[$cnid]['leasetime'];
-	
-	$pconfig['hostno'] = $a_hosts[$cnid]['hostno'];
-	}
-else {
-	$pconfig['uuid'] = uuid();
-	$pconfig['macaddr'] = "";
-	$pconfig['ipadress'] = "";
-	$pconfig['hostname'] = "";
-	$pconfig['leasetime'] = "60";
-	
-	$pconfig['hostno'] = dnsmasq_get_next_hostno();
-	}
+
 
 function dnsmasq_get_next_hostno() {
 	global $config;
@@ -219,6 +228,7 @@ include("fbegin.inc");
 					<div id="submit">
 					<input name="Submit" type="submit" class="formbtn" value="<?=gettext("Save");?>" />
 					<input name="hostno" type="hidden" value="<?=$pconfig['hostno'];?>" />
+					<input name="mode" type="hidden" value="<?=$pconfig['mode'];?>" />
 					<input name="uuid" type="hidden" value="<?=$pconfig['uuid'];?>" />
 					<input name="Submit" type="submit" class="formbtn" value="<?=gettext("Cancel");?>" />
 					</div>
@@ -233,5 +243,4 @@ include("fbegin.inc");
 
 	
 </table>
-
 <?php include("fend.inc"); ?>
