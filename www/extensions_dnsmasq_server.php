@@ -53,7 +53,7 @@ if ($_POST) {
 		$savemsg = "";
 		$warnmess ="";
 		dnsmasq_config();
-		rc_restart_service("dnsmasq");
+		if (isset ($config['dnsmasq']['enable'])) { rc_update_rcconf("dnsmasq", "enable"); rc_restart_service("dnsmasq"); }	else { 	 rc_stop_service("dnsmasq"); rc_update_rcconf("dnsmasq", "disable");}
 		unlink ("/var/run/dnsmasq.reload");
 	}
 	
