@@ -10,7 +10,7 @@ include_once ($config['dnsmasq']['rootfolder']."www/function.inc");
 if (!isset($config['dnsmasq']) || !is_array($config['dnsmasq'])) header("Location: extensions_dnsmasq_conf.php");
 if (is_file("/var/run/dnsmasq.reload")) $warnmess = file_get_contents("/var/run/dnsmasq.reload");
 if ($_POST) {
-	if (isset($_POST['Submit']) && ($_POST['Submit'] === "Save")) { 
+	if (isset($_POST['Submit']) && ($_POST['Submit'] === "Save")) {  $pconfig = $_POST;
 		unset($input_errors);
 		if (isset($_POST['enable'])) { 	$config['dnsmasq']['enable'] = TRUE; } else { unset($config['dnsmasq']['enable']); }
 			
@@ -28,6 +28,11 @@ if ($_POST) {
 					$reqdfieldst = explode(" ", "ipaddr ipaddr numeric");
 					do_input_validation($_POST, $reqdfields, $reqdfieldsn, $input_errors);
 					do_input_validation_type($_POST, $reqdfields, $reqdfieldsn, $reqdfieldst, $input_errors);
+					$subnet = $config['interfaces']['lan']['ipaddr']."/".$config['interfaces']['lan']['subnet'];
+					if (is_ipaddr ($_POST['startadr'])) { 
+						if (false == ($cnif =ip_in_subnet($_POST['startadr'],$subnet))) {$input_errors[] = "Value \"DHCP range - start\" is not belongs to the subnet LAN"; goto out;} else {} }
+					if (is_ipaddr ($_POST['endadr'])) { 
+						if (false == ($cnif =ip_in_subnet($_POST['endadr'],$subnet))) {$input_errors[] = "Value \"DHCP range - end\" is not belongs to the subnet LAN"; goto out;} else {} }
 					}
 					
 					if (empty($input_errors)) { 
