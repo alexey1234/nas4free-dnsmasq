@@ -5,6 +5,8 @@ extensions_dnsmasq_conf.php
 ob_start();
 require("auth.inc");
 require("guiconfig.inc");
+require_once("XML/Serializer.php");
+require_once("XML/Unserializer.php");
 if (!isset($config['dnsmasq']) || !is_array($config['dnsmasq'])) $config['dnsmasq']=array();
 if (!isset($config['dnsmasq']['rootfolder']) ) {
 		if(file_exists( '/tmp/dnsmasq.tmp' )  ) {
@@ -21,7 +23,70 @@ if ($_POST) {
 	
 	unset($input_errors);
 	$pconfig = $_POST;
-	 
+	if (isset($_POST['export']) && $_POST['export']) {
+	$options = array(
+			XML_SERIALIZER_OPTION_XML_DECL_ENABLED => true,
+			XML_SERIALIZER_OPTION_INDENT           => "\t",
+			XML_SERIALIZER_OPTION_LINEBREAKS       => "\n",
+			XML_SERIALIZER_OPTION_XML_ENCODING     => "UTF-8",
+			XML_SERIALIZER_OPTION_ROOT_NAME        => get_product_name(),
+			XML_SERIALIZER_OPTION_ROOT_ATTRIBS     => array("version" => get_product_version(), "revision" => get_product_revision()),
+			XML_SERIALIZER_OPTION_DEFAULT_TAG      => "hosts",
+			XML_SERIALIZER_OPTION_MODE             => XML_SERIALIZER_MODE_DEFAULT,
+			XML_SERIALIZER_OPTION_IGNORE_FALSE     => true,
+			XML_SERIALIZER_OPTION_CONDENSE_BOOLS   => true,
+	);
+
+	$serializer = new XML_Serializer($options);
+	$status = $serializer->serialize($config['dnsmasq']);
+
+	if (@PEAR::isError($status)) {
+		$errormsg = $status->getMessage();
+	} else {
+		$ts = date("YmdHis");
+		$fn = "dnsmasq-{$config['system']['hostname']}.{$config['system']['domain']}-{$ts}.dnsmasq";
+		$data = $serializer->getSerializedData();
+		$fs = strlen($data);
+
+		header("Content-Type: application/octet-stream");
+		header("Content-Disposition: attachment; filename={$fn}");
+		header("Content-Length: {$fs}");
+		header("Pragma: hack");
+		echo $data;
+
+		exit;
+	}
+} else if (isset($_POST['import']) && $_POST['import']) {
+	if (is_uploaded_file($_FILES['jailsfile']['tmp_name'])) {
+		$options = array(
+				XML_UNSERIALIZER_OPTION_COMPLEXTYPE => 'array',
+				XML_UNSERIALIZER_OPTION_ATTRIBUTES_PARSE => true,
+				XML_UNSERIALIZER_OPTION_FORCE_ENUM  => $listtags,
+		);
+
+		$unserializer = new XML_Unserializer($options);
+		$status = $unserializer->unserialize($_FILES['jailsfile']['tmp_name'], true);
+
+		if (@PEAR::isError($status)) {
+			$errormsg = $status->getMessage();
+		} else {
+			// Take care array already exists.
+			if (!isset($config['dnsmasq']) || !is_array($config['dnsmasq']))
+				$config['dnsmasq'] = array();
+
+			$data = $unserializer->getUnserializedData();
+
+			
+			write_config();
+
+			header("Location: extensions_thebrig.php");
+			exit;
+		}
+	} else {
+		$errormsg = sprintf("%s %s", gettext("Failed to upload file."),
+				$g_file_upload_error[$_FILES['jailsfile']['error']]);
+	}
+} 
 	if ( $pconfig['remove'] ) {
 		
 		// we want to remove dnsmasq
@@ -105,7 +170,27 @@ else if ($savemsg) { print_info_box($savemsg); }
 		<table width="100%" border="0" cellpadding="6" cellspacing="0">
 		<?php html_titleline(gettext("Extension dnsmasq basic setting"));?>
 		<?php html_inputbox("rootfolder", gettext("Extension working folder"), $pconfig['rootfolder'], gettext("folder where extension sets"), true, 50);?>
-	 	<?php //html_filechooser("rootfolder", gettext("Media Directory"), $pconfig['rootfolder'], gettext("Directory that contains our jails (e.g /mnt/Mount_Point/Folder). We will create folder /mnt/Mount_Point/Folder/dnsmasq/"), $g['media_path'], true);?>
+		<?php html_separator();?>
+		<?php html_titleline(gettext("Configuration Backup/Restore"));?>
+			 	<tr>
+						<td width="22%" valign="top" class="vncell">Backup Existing Config&nbsp;</td>
+						<td width="78%" class="vtable">
+							<?=gettext("Make a backup of the existing configuration. Usefull way send downloaded config to forum for help ");?><br />
+							<div id="submit">
+								<input name="export" type="submit" class="formbtn" value="<?=gettext("Export");?>" /><br />
+							</div>
+						</td>
+					</tr>
+			<!---		<tr>
+						<td width="22%" valign="top" class="vncell">Restore&nbsp;</td>
+						<td width="78%" class="vtable">
+							<?=gettext("Restore jails config from XML.");?><br />
+							<div id="submit">
+								<input name="jailsfile" type="file" class="formfld" id="jailsfile" size="40" accept="*.jails" />&nbsp;
+								<input name="import" type="submit" class="formbtn" id="import" value="<?=gettext("Import");?>" /><br />
+							</div>
+						</td>
+					</tr> -->
 		<?php html_separator();?>		
 		<?php html_titleline(gettext(" remove extension"));?>
 		
