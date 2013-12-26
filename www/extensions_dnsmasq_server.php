@@ -1,7 +1,7 @@
 <?php
 /* 
 extensions_dnsmasq_server.php
-Version 0.1
+Version 0.2
 */
 ob_start();
 require("auth.inc");
