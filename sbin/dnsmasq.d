@@ -39,15 +39,9 @@ dnsmasq_enable=${dnsmasq_enable="NO"}
 dnsmasq_conf_dir=${dnsmasq_conf_dir-"/var/etc"}
 dnsmasq_conf=${dnsmasq_conf-"${dnsmasq_conf_dir}/${name}.conf"}
 
-
 : ${dnsmasq_restart="YES"}
 command="/usr/local/sbin/${name}"
 command_args="-x $pidfile -C $dnsmasq_conf"
-
-required_files="${dnsmasq_conf}"
-
-
-
 
 reload_pre() {
         if [ "$dnsmasq_conf" -nt "${timestamp}" ] ; then
