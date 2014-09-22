@@ -1,74 +1,53 @@
 #!/bin/sh
-
-# $FreeBSD: head/dns/dnsmasq/files/dnsmasq.in 302141 2012-08-05 23:19:36Z dougb $
 #
+
+
 # PROVIDE: dnsmasq
 # REQUIRE: SERVERS
 # BEFORE:  DAEMON named
 # KEYWORD: shutdown
-#RCVAR: dnsmasq
-#
-# Start before named so as not to break named_wait if named is
-# enabled and /etc/resolv.conf points to ourselves (dnsmasq).
-#
-#
-# Please add the following line to /etc/rc.conf.local or /etc/rc.conf to
-# enable the dnsmasq service(s):
-#
-# dnsmasq_enable (bool):  Set to "NO" by default.
-#                         Set it to "YES" to enable dnsmasq at boot.
-#
-# Further settings you can change in /etc/rc.conf if desired:
-#
-# dnsmasq_conf (path):    Set to /usr/local/etc/dnsmasq.conf by default.
-#                         Set it to another configuration file if you want.
-#
-# dnsmasq_flags (string): Empty by default. Set it to additional command
-#                         line arguments if desired.
-#
-# dnsmasq_restart (bool): Set to "YES" by default.
-#                         If "YES", a "reload" action will trigger a "restart"
-#                         if the configuration file has changed, to work
-#                         around a dnsmasq(8) limitation.
-#
-#
-# Additional actions supported by this script:
-#
-# reload        Reload database files by sending SIGHUP and SIGUSR2.
-#               However, if dnsmasq_restart is true (see above) and the
-#               configuration file has changed since this rc script has
-#               started dnsmasq, restart it instead.
-#
-# logstats      Dump statistics information to where dnsmasq is configured to
-#               log (syslog by default). This sends SIGUSR1 to dnsmasq.
-#
+# XQUERY: -i "count(//dnsmasq/enable) > 0" -o "0" -b
+# RCVAR: dnsmasq
 
 . /etc/rc.subr
+. /etc/util.subr
+. /etc/configxml.subr
 
 name=dnsmasq
 rcvar=dnsmasq_enable
 
-command="/usr/local/sbin/${name}"
+
 pidfile="/var/run/${name}.pid"
 # timestamp (below) is used to check if "reload" should be a "restart" instead
 timestamp="/var/run/${name}.stamp"
 
 load_rc_config "${name}"
 
-: ${dnsmasq_enable="NO"}
-: ${dnsmasq_conf="/etc/${name}.conf"}
-: ${dnsmasq_restart="YES"}
-
-command_args="-x $pidfile -C $dnsmasq_conf"
-
-required_files="${dnsmasq_conf}"
-extra_commands="reload logstats"
-
+# Custom commands
+mkconf_cmd="dnsmasq_mkconf"
+start_precmd="dnsmasq_mkconf"
 reload_precmd="reload_pre"
 reload_postcmd="reload_post"
 start_postcmd="timestampconf"
 stop_precmd="rmtimestamp"
 logstats_cmd="logstats"
+extra_commands="mkconf reload logstats"
+
+
+# Defaults
+dnsmasq_enable=${dnsmasq_enable="NO"}
+dnsmasq_conf_dir=${dnsmasq_conf_dir-"/var/etc"}
+dnsmasq_conf=${dnsmasq_conf-"${dnsmasq_conf_dir}/${name}.conf"}
+
+
+: ${dnsmasq_restart="YES"}
+command="/usr/local/sbin/${name}"
+command_args="-x $pidfile -C $dnsmasq_conf"
+
+required_files="${dnsmasq_conf}"
+
+
+
 
 reload_pre() {
         if [ "$dnsmasq_conf" -nt "${timestamp}" ] ; then
@@ -97,4 +76,81 @@ rmtimestamp() {
         rm -f "${timestamp}"
 }
 
+dnsmasq_mkconf()
+{
+	local _listenadress _interface _router
+	
+	_rootfolder=`configxml_get "//dnsmasq/rootfolder"`
+	_listenadress=`configxml_get "//interfaces/lan/ipaddr"`
+	_interface=`configxml_get "//interfaces/lan/if"`
+	_router=`configxml_get "//interfaces/lan/gateway"`
+	_startaddr=`configxml_get "//dnsmasq/startadr"`
+	_endaddr=`configxml_get "//dnsmasq/endadr"`
+	_leasemax=`configxml_get "//dnsmasq/leasecount"`
+	_logging=`configxml_get "//dnsmasq/logging"`
+	
+	cat << EOF > ${dnsmasq_conf}
+# Defaults
+log-facility=/var/log/dnsmasq.log
+dhcp-leasefile=/var/db/dnsmasq.leases
+user=nobody
+group=nobody
+domain-needed
+bogus-priv
+domain=local
+expand-hosts
+local=/local/
+dhcp-option=23,50
+dhcp-authoritative
+# Build from main config
+listen-address=${_listenadress}
+interface=${_interface}
+dhcp-option=option:router,${_router}
+dhcp-option=42,0.0.0.0
+# Setting over NAS4Free webGUI
+dhcp-range=${_startaddr},${_endaddr},10m
+dhcp-lease-max=${_leasemax}
+EOF
+case ${_logging} in
+		all)
+			echo "log-queries" >> ${dnsmasq_conf};
+			echo "log-dhcp" >> ${dnsmasq_conf};
+			;;
+		dhcp)
+			echo "log-dhcp" >> ${dnsmasq_conf};
+			;;
+		mini)
+			
+			;;
+esac
+xml sel -t \
+	-i "count(//dnsmasq/extconfig) > 0" -o "conf-dir=" -v "//dnsmasq/rootfolder" -o "conf" -n -b \
+	${configxml_file} | /usr/local/bin/xml unesc >> ${dnsmasq_conf}
+xml sel -t \
+	-i "string-length(//dnsmasq/tftpboot) > 3" -o "dhcp-boot=" -v "//dnsmasq/tftpboot" -n -b \
+	${configxml_file} | /usr/local/bin/xml unesc >> ${dnsmasq_conf}
+xml sel -t \
+	-i "count(//dnsmasq/enabletftp) > 0" -o "enable-tftp" -n -b \
+	${configxml_file} | /usr/local/bin/xml unesc >> ${dnsmasq_conf}
+#todo - need correct path into php file
+xml sel -t \
+	-i "string-length(//dnsmasq/tftproot) > 3" -o "tftp-root=" -v "//dnsmasq/tftproot" -n -b \
+	${configxml_file} | /usr/local/bin/xml unesc >> ${dnsmasq_conf}
+
+_index=`configxml_get_count "//dnsmasq/hosts"`
+while [ ${_index} -gt 0 ]
+	do
+	
+	/usr/local/bin/xml sel -t -m "//dnsmasq/hosts[position()=${_index}]" \
+	-o "dhcp-host="  \
+	-i "string-length(macaddr) > 3" -v "concat(macaddr,',')" -b \
+	-i "string-length(ipadress) > 3" -v "concat(ipadress,',')" -b \
+	-i "string-length(hostname) > 3" -v "concat(hostname,',')" -b \
+	-i "string-length(leasetime) > 0" -v "leasetime" --else -o "15m" -b -n \
+	-b \
+	${configxml_file} | /usr/local/bin/xml unesc >> ${dnsmasq_conf}
+	_index=$(( ${_index} - 1 ))
+	
+	done
+}	
 run_rc_command "$1"
