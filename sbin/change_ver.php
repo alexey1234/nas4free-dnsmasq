@@ -15,7 +15,7 @@ if (is_array($config['dnsmasq'])) {
 			$installed_version=substr($version_2[1],1,3);
 			if ($installed_version == $currentversion) {
 				$message = "No need updates \n"; 
-				if (is_file("/tmp/thebrigversion") ) unlink ("/tmp/thebrigversion");
+				if (is_file("/tmp/dnsmasqversion") ) unlink ("/tmp/dnsmasqversion");
 				goto met1;
 				}
 			else {

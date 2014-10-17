@@ -79,7 +79,7 @@ if ($_POST) {
 			
 			write_config();
 
-			header("Location: extensions_thebrig.php");
+			header("Location: extensions_dnsmasq.php");
 			exit;
 		}
 	} else {
