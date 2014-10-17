@@ -30,15 +30,15 @@ cd temporary || exerr "ERROR: Could not access install directory!"
 
 # Fetch the master branch as a zip file
 echo "Retrieving the most recent version of dnsmasq"
-fetch https://github.com/alexey1234/nas4free-dnsmasq/archive/master.zip || exerr "ERROR: Could not write to install directory!"
+fetch https://github.com/avjui/nas4free-dnsmasq/archive/working.zip || exerr "ERROR: Could not write to install directory!"
 
 
 # Extract the files we want, stripping the leading directory, and exclude
 # the git nonsense
 echo "Unpacking the tarball..."
-tar -xvf master.zip --exclude='.git*' --strip-components 1
+tar -xvf working.zip --exclude='.git*' --strip-components 1
 # Get rid of the tarball
-rm master.zip
+rm working.zip
 
 # Run the change_ver script to deal with different versions of dnsmasq
 /usr/local/bin/php-cgi -f sbin/change_ver.php

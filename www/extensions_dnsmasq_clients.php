@@ -17,7 +17,7 @@ include("fbegin.inc");?>
 			<li class="tabinact"><a href="extensions_dnsmasq_conf.php"><span>config</span></a></li>
 			<li class="tabact"><a href="extensions_dnsmasq_clients.php"><span>Client table</span></a></li>
 			<li class="tabinact"><a href="extensions_dnsmasq_log.php"><span>Log</span></a></li>
-			<!--<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li> -->
+			<!--<li class="tabinact"><a href="extensions_dnsmasq_log.php"><span><?=gettext("Log");?></span></a></li> -->
 					
 		</ul>
 	</td></tr>
