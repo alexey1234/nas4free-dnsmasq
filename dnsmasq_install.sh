@@ -36,9 +36,9 @@ fetch https://github.com/avjui/nas4free-dnsmasq/archive/working.zip || exerr "ER
 # Extract the files we want, stripping the leading directory, and exclude
 # the git nonsense
 echo "Unpacking the tarball..."
-tar -xvf master.zip --exclude='.git*' --strip-components 1
+tar -xvf working.zip --exclude='.git*' --strip-components 1
 # Get rid of the tarball
-rm master.zip
+rm working.zip
 
 # Run the change_ver script to deal with different versions of dnsmasq
 /usr/local/bin/php-cgi -f sbin/change_ver.php
