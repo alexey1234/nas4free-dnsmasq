@@ -30,7 +30,7 @@ cd temporary || exerr "ERROR: Could not access install directory!"
 
 # Fetch the master branch as a zip file
 echo "Retrieving the most recent version of dnsmasq"
-fetch https://github.com/alexey1234/nas4free-dnsmasq/archive/master.zip || exerr "ERROR: Could not write to install directory!"
+fetch https://github.com/avjui/nas4free-dnsmasq/archive/working.zip || exerr "ERROR: Could not write to install directory!"
 
 
 # Extract the files we want, stripping the leading directory, and exclude
