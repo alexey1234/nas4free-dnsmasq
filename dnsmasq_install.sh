@@ -13,6 +13,7 @@ echo $START_FOLDER > /tmp/dnsmasqinstaller
 _rootfolder=`configxml_get "//dnsmasq/rootfolder"`
 if [ ! -z $_rootfolder ]; then
 	DMAS_ROOT=$_rootfolder
+	/etc/rc.d/dnsmasq stop
 	rm -f /usr/local/sbin/dnsmasq
 	rm -f /etc/rc.d/dnsmasq
 else
