@@ -25,7 +25,7 @@ if ($_POST) {
 		if ( $pconfig['rootfolder'][strlen($pconfig['rootfolder'])-1] != "/")  { $pconfig['rootfolder'] = $pconfig['rootfolder'] . "/"; } else {}
 		if ( !is_dir( $pconfig['rootfolder'] ) && !isset($pconfig['remove']) ) {  $input_errors[] = "Not existent folder"; 	}
 		else if ( !is_writable( $pconfig['rootfolder'] ) && !isset($pconfig['remove']) ){ $input_errors[] = "Not writible folder"; 	}
-	}
+	
 	
 	if ( !$input_errors ){ 
 	$config['dnsmasq']['rootfolder'] = $pconfig['rootfolder'];
@@ -80,27 +80,7 @@ else if ($savemsg) { print_info_box($savemsg); }
 		<table width="100%" border="0" cellpadding="6" cellspacing="0">
 		<?php html_titleline(gettext("Extension dnsmasq basic setting"));?>
 		<?php html_inputbox("rootfolder", gettext("Extension working folder"), $pconfig['rootfolder'], gettext("folder where extension sets"), true, 50);?>
-		<?php html_separator();?>
-		<?php html_titleline(gettext("Configuration Backup/Restore"));?>
-			 	<tr>
-						<td width="22%" valign="top" class="vncell">Backup Existing Config&nbsp;</td>
-						<td width="78%" class="vtable">
-							<?=gettext("Make a backup of the existing configuration. Usefull way send downloaded config to forum for help ");?><br />
-							<div id="submit">
-								<input name="export" type="submit" class="formbtn" value="<?=gettext("Export");?>" /><br />
-							</div>
-						</td>
-					</tr>
-			<!---		<tr>
-						<td width="22%" valign="top" class="vncell">Restore&nbsp;</td>
-						<td width="78%" class="vtable">
-							<?=gettext("Restore jails config from XML.");?><br />
-							<div id="submit">
-								<input name="jailsfile" type="file" class="formfld" id="jailsfile" size="40" accept="*.jails" />&nbsp;
-								<input name="import" type="submit" class="formbtn" id="import" value="<?=gettext("Import");?>" /><br />
-							</div>
-						</td>
-					</tr> -->
+		
 		<?php html_separator();?>		
 		<?php html_titleline(gettext(" remove extension"));?>
 		
