@@ -63,7 +63,7 @@ if ($_POST) {
 		} 
 	write_config();
 	unlink_if_exists("/tmp/dnsmasq.tmp");
-	if ( !is_file( "/etc/rc.d/dnsmasq" )) {$cmd = "install -c -o root -g wheel -m 755 ".$config['dnsmasq']['rootfolder']."sbin/dnsmasq.d /etc/rc.d/dnsmasq";  exec($cmd);} else {}
+	if ( !is_link( "/etc/rc.d/dnsmasq" )) {symlink ( $config['dnsmasq']['rootfolder']."sbin/dnsmasq.d","/etc/rc.d/dnsmasq");} else {}
 	if ( !is_link ( "/usr/local/sbin/dnsmasq") ) symlink ( $config['dnsmasq']['rootfolder']."sbin/dnsmasq","/usr/local/sbin/dnsmasq"); else {}
 	if (!is_dir ( $config['dnsmasq']['rootfolder']."tftproot") ) mkdir ( $config['dnsmasq']['rootfolder']."tftproot", 0777); else {}
 	if (!is_dir ( $config['dnsmasq']['rootfolder']."conf") ) mkdir ( $config['dnsmasq']['rootfolder']."conf", 0777); else {}
