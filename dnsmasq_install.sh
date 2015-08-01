@@ -70,6 +70,5 @@ cd $START_FOLDER
 rm -Rf temporary/*
 rmdir temporary
 rm /tmp/dnsmasqinstaller
-rm /tmp/dnsmasqversion
 currentdate=`date -j +"%h %d %H:%M:%S"`
 echo "$currentdate installer[0001]: install or upgrade action successfull" >> /var/log/dnsmasq.log
