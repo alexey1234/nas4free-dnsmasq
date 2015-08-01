@@ -156,7 +156,7 @@ $(document).ready(function () {
 				<?php html_inputbox("startadr", gettext("DHCP range - start"), $pconfig['startadr'], gettext("Choice start adress for DHCP hosts"), false, 16,false);?>
 				<?php html_inputbox("endadr", gettext("DHCP range - end"), $pconfig['endadr'], gettext("Choice end adress for DHCP hosts"), false, 16,false);?>
 				<?php html_inputbox("leasecount", gettext("How leases allow"), !empty($pconfig['leasecount']) ? $pconfig['leasecount'] : "150", gettext("Set the limit on DHCP leases, the default is 150"), false, 16,false);?>
-				<?php html_checkbox("extconfig", gettext("Allow external config"), !isset($pconfig['extconfig']) ? true : false, gettext("Allow support for external config files. Config files may have any name, exclude *.bak and placed into <b>".$config['dnsmasq']['rootfolder']."conf</b> folder"),"","","enable_booting(false)");?>
+				<?php html_checkbox("extconfig", gettext("Allow external config"), $pconfig['extconfig'], gettext("Allow support for external config files. Config files may have any name, exclude *.bak and placed into <b>".$config['dnsmasq']['rootfolder']."conf</b> folder"),"","","enable_booting(false)");?>
 				<?php html_combobox("logging", gettext("Log configuration"), $pconfig['logging'], array("mini" => gettext("System only"), "dhcp" => gettext("System+DHCP queries"), "all" => gettext("DNS+DHCP+Systems")), "", false, false, "" );?>
 				<?php html_inputbox("tftpboot", gettext("Boot kernel name"), $pconfig['tftpboot'], gettext("Define first boot kernel name"), false, 60,false);?>
 				<?php html_separator(); ?>
