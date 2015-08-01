@@ -43,11 +43,11 @@ tar -xvf master.zip --exclude='.git*' --strip-components 1
 rm master.zip
 echo "dnsmasq install/update"
 if [ `uname -p` = "amd64" ]; then
-	echo "Renaming 64 bit ftp binary"
+	echo "Renaming 64 bit dnsmasq binary"
 	mv sbin/dnsmasq_64 sbin/dnsmasq
 	rm sbin/dnsmasq_86
 else
-	echo "Renaming 32 bit ftp binary"
+	echo "Renaming 32 bit dnsmasq binary"
 	mv sbin/dnsmasq_86 sbin/dnsmasq
 	rm sbin/dnsmasq_64
 fi
