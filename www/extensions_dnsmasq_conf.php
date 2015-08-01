@@ -36,7 +36,7 @@ if ($_POST) {
  			if ( is_link( $file ) ) { unlink( $file ); 	} 
  		} 
 		foreach ( glob( "/usr/local/www/ext/dnsmasq/*" ) as $file ) { unlink( $file ); 	}
-		if ( is_dir( "/usr/local/www/ext/dnsmasq/" ) ) {  rmdir( "/usr/local/www/ext/dnsmasq/" );  	}
+		unlink_if_exists( "/usr/local/www/ext/dnsmasq" );
 		unlink_if_exists( "/usr/local/sbin/dnsmasq" ); 
 		unlink_if_exists("/etc/rc.d/dnsmasq" );
 		unset ($config['dnsmasq']);
