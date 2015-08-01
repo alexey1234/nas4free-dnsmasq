@@ -5,8 +5,6 @@ extensions_dnsmasq_conf.php
 ob_start();
 require("auth.inc");
 require("guiconfig.inc");
-require_once("XML/Serializer.php");
-require_once("XML/Unserializer.php");
 if (!isset($config['dnsmasq']) || !is_array($config['dnsmasq'])) $config['dnsmasq']=array();
 if (!isset($config['dnsmasq']['rootfolder']) ) {
 		if(file_exists( '/tmp/dnsmasq.tmp' )  ) {
@@ -23,95 +21,7 @@ if ($_POST) {
 	
 	unset($input_errors);
 	$pconfig = $_POST;
-	if (isset($_POST['export']) && $_POST['export']) {
-	$options = array(
-			XML_SERIALIZER_OPTION_XML_DECL_ENABLED => true,
-			XML_SERIALIZER_OPTION_INDENT           => "\t",
-			XML_SERIALIZER_OPTION_LINEBREAKS       => "\n",
-			XML_SERIALIZER_OPTION_XML_ENCODING     => "UTF-8",
-			XML_SERIALIZER_OPTION_ROOT_NAME        => get_product_name(),
-			XML_SERIALIZER_OPTION_ROOT_ATTRIBS     => array("version" => get_product_version(), "revision" => get_product_revision()),
-			XML_SERIALIZER_OPTION_DEFAULT_TAG      => "hosts",
-			XML_SERIALIZER_OPTION_MODE             => XML_SERIALIZER_MODE_DEFAULT,
-			XML_SERIALIZER_OPTION_IGNORE_FALSE     => true,
-			XML_SERIALIZER_OPTION_CONDENSE_BOOLS   => true,
-	);
 
-	$serializer = new XML_Serializer($options);
-	$status = $serializer->serialize($config['dnsmasq']);
-
-	if (@PEAR::isError($status)) {
-		$errormsg = $status->getMessage();
-	} else {
-		$ts = date("YmdHis");
-		$fn = "dnsmasq-{$config['system']['hostname']}.{$config['system']['domain']}-{$ts}.dnsmasq";
-		$data = $serializer->getSerializedData();
-		$fs = strlen($data);
-
-		header("Content-Type: application/octet-stream");
-		header("Content-Disposition: attachment; filename={$fn}");
-		header("Content-Length: {$fs}");
-		header("Pragma: hack");
-		echo $data;
-
-		exit;
-	}
-} else if (isset($_POST['import']) && $_POST['import']) {
-	if (is_uploaded_file($_FILES['jailsfile']['tmp_name'])) {
-		$options = array(
-				XML_UNSERIALIZER_OPTION_COMPLEXTYPE => 'array',
-				XML_UNSERIALIZER_OPTION_ATTRIBUTES_PARSE => true,
-				XML_UNSERIALIZER_OPTION_FORCE_ENUM  => $listtags,
-		);
-
-		$unserializer = new XML_Unserializer($options);
-		$status = $unserializer->unserialize($_FILES['jailsfile']['tmp_name'], true);
-
-		if (@PEAR::isError($status)) {
-			$errormsg = $status->getMessage();
-		} else {
-			// Take care array already exists.
-			if (!isset($config['dnsmasq']) || !is_array($config['dnsmasq']))
-				$config['dnsmasq'] = array();
-
-			$data = $unserializer->getUnserializedData();
-
-			
-			write_config();
-
-			header("Location: extensions_thebrig.php");
-			exit;
-		}
-	} else {
-		$errormsg = sprintf("%s %s", gettext("Failed to upload file."),
-				$g_file_upload_error[$_FILES['jailsfile']['error']]);
-	}
-} 
-	if ( $pconfig['remove'] ) {
-		
-		// we want to remove dnsmasq
-		
-		$i = 0;
- 		if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
- 			for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
- 			if (true == ($cnid = preg_match('/start_dnsmasq/', $config['rc']['postinit']['cmd'][$i]))) unset($config['rc']['postinit']['cmd'][$i]);	else {}
-				} 
-		}
-		foreach ( glob( "{$config['dnsmasq']['rootfolder']}conf/ext/dnsmasq/*.php" ) as $file ) {
- 			$file = str_replace("{$config['dnsmasq']['rootfolder']}conf/ext/dnsmasq", "/usr/local/www", $file);
- 			if ( is_link( $file ) ) { unlink( $file ); 	} 
- 		} 
-		foreach ( glob( "/usr/local/www/ext/dnsmasq/*" ) as $file ) { unlink( $file ); 	}
-		if ( is_dir( "/usr/local/www/ext/dnsmasq/" ) ) {  rmdir( "/usr/local/www/ext/dnsmasq/" );  	}
-		if ( is_link( "/usr/local/sbin/dnsmasq" ) ) unlink( "/usr/local/sbin/dnsmasq" ); else {}	
-		if ( is_file( "/etc/rc.d/dnsmasq" ) ) unlink( "/etc/rc.d/dnsmasq" ); else {}
-		unset ($config['dnsmasq']);
-		write_config();
-				// Browse back to the main page
-		header("Location: /");
-		exit;
-	}
-	else { 
 		if ( $pconfig['rootfolder'][strlen($pconfig['rootfolder'])-1] != "/")  { $pconfig['rootfolder'] = $pconfig['rootfolder'] . "/"; } else {}
 		if ( !is_dir( $pconfig['rootfolder'] ) && !isset($pconfig['remove']) ) {  $input_errors[] = "Not existent folder"; 	}
 		else if ( !is_writable( $pconfig['rootfolder'] ) && !isset($pconfig['remove']) ){ $input_errors[] = "Not writible folder"; 	}
