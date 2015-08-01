@@ -58,7 +58,7 @@ if ($_POST) {
 	}
 	
 }
-$pconfig['enable'] = $config['dnsmasq']['enable'];
+$pconfig['enable'] = isset($config['dnsmasq']['enable']) ? true : false;
 $pconfig['extconfig'] = isset ($config['dnsmasq']['extconfig']) ? true : false;
 $pconfig['logging'] = $config['dnsmasq']['logging'];
 $pconfig['startadr'] = $config['dnsmasq']['startadr'];
@@ -138,7 +138,7 @@ $(document).ready(function () {
 			
 			<table width="100%" border="0" cellpadding="5" cellspacing="0">
 							<!-- <table width="100%" border="0" cellpadding="5" cellspacing="0"> -->
-				<?php html_titleline_checkbox("enable", gettext("Dynamic Host Configuration Protocol"), isset($pconfig['enable']) ? true : false, gettext("Enable"), "enable_change(false)");?>
+				<?php html_titleline_checkbox("enable", gettext("Dynamic Host Configuration Protocol"), $pconfig['enable'], gettext("Enable"), "enable_change(false)");?>
 				
 				<?php // html_titleline_checkbox("enable", gettext("Dynamic Host Configuration Protocol"), isset($pconfig['enable']) ? true : false, gettext("Enable"), "enable_change(false)");?>
 				
