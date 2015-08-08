@@ -100,11 +100,12 @@ interface=${_interface}
 dhcp-option=option:router,${_router}
 dhcp-option=42,0.0.0.0
 # Setting over NAS4Free webGUI
-dhcp-lease-max=${_leasemax}
 EOF
-if [ -n ${_startaddr} ] && [ -n ${_endaddr} ] 
-	then echo 'dhcp-range='${_startaddr}','${_endaddr}',10m'  >> ${dnsmasq_conf}
+if [ -n "${_startaddr}" ] &&  [ -n "${_endaddr}" ] ; then 
+		echo 'dhcp-range='${_startaddr}','${_endaddr}',10m'  >> ${dnsmasq_conf}
+		echo 'dhcp-lease-max='${_leasemax}  >> ${dnsmasq_conf}
 fi
+
 case ${_logging} in
 		all)
 			echo "log-queries" >> ${dnsmasq_conf};
