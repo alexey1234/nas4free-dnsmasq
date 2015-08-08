@@ -1,4 +1,6 @@
 #!/bin/sh
+#Version 0.2
+
 . /etc/rc.subr
 . /etc/util.subr
 . /etc/configxml.subr
