@@ -120,7 +120,7 @@ else if ($savemsg) { print_info_box($savemsg); }
 		</table>
 	<?php include("formend.inc");	?>
 </form>	
-		<form action="extensions_dnsmasq_conf.php" method="post" name="iform" id="iform">
+		<form action="exec.php" method="post" name="iform" id="iform">
 		<table width="100%" border="0" cellpadding="6" cellspacing="0">
 		
 		
@@ -148,7 +148,7 @@ else if ($savemsg) { print_info_box($savemsg); }
 	
 			<tr><td width="22%" valign="top" class="vncell">&nbsp;Current status</td>
 			<td width="78%" class="vtable" >The latest version on GitHub is: <?=$gitversion[1];?><br />Your version is: <?=$localversion[1];?><br />
-	
+	<input name="txtCommand" type="hidden" value="<?="sh /tmp/dnsmasq_install.sh";?>" />
 			 	<input name="Submit" type="submit" class="formbtn" value="Update">
 			</td>
 		</tr>
@@ -160,6 +160,3 @@ else if ($savemsg) { print_info_box($savemsg); }
 
 </td></tr>
 </table>
-
-
-<?php 	include("fend.inc"); ?>
