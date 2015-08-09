@@ -80,7 +80,8 @@ dnsmasq_mkconf()
 	_endaddr=`configxml_get "//dnsmasq/endadr"`
 	_leasemax=`configxml_get "//dnsmasq/leasecount"`
 	_logging=`configxml_get "//dnsmasq/logging"`
-	
+	_broadcast=`/sbin/ifconfig ${_interface} |  grep broadcast | awk '{print \$6}'`
+
 	cat << EOF > ${dnsmasq_conf}
 # Defaults
 log-facility=/var/log/dnsmasq.log
@@ -99,12 +100,12 @@ listen-address=${_listenadress}
 interface=${_interface}
 dhcp-option=option:router,${_router}
 dhcp-option=42,0.0.0.0
+dhcp-option=28,${_broadcast}
 # Setting over NAS4Free webGUI
-
 EOF
-if [ -n "${_startaddr}" ] && [ -n "${_endaddr}" ]  ;	then 
-	echo 'dhcp-range='${_startaddr}','${_endaddr}',10m'  >> ${dnsmasq_conf}
-	echo 'dhcp-lease-max='${_leasemax}  >> ${dnsmasq_conf}
+if [ -n "${_startaddr}" ] &&  [ -n "${_endaddr}" ] ; then 
+		echo 'dhcp-range='${_startaddr}','${_endaddr}',10m'  >> ${dnsmasq_conf}
+		echo 'dhcp-lease-max='${_leasemax}  >> ${dnsmasq_conf}
 fi
 case ${_logging} in
 		all)
