@@ -216,7 +216,7 @@ include("fbegin.inc");
 					<?php html_inputbox("macaddr", gettext("MAC adress"), $pconfig['macaddr'], gettext("Define MAC adress for host"), false, 26,false);?>
 					<?php html_inputbox("ipadress", gettext("IP adress"), $pconfig['ipadress'], gettext("Define IP  adress for host"), false, 16,false);?>
 					<?php html_inputbox("hostname", gettext("Hostname"), $pconfig['hostname'], gettext("Define hostname for host"), false, 16,false);?>
-					<?php html_inputbox("leasetime", gettext("Lease time"), $pconfig['leasetime'], gettext("Define lease time for this host, minutes"), false, 16,false);?>
+					<?php html_inputbox("leasetime", gettext("Lease time"), $pconfig['leasetime'], gettext("Define lease time for this host, seconds"), false, 16,false);?>
 					
 					
 		
