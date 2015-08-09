@@ -21,7 +21,7 @@ if ($_POST) {
 	
 	unset($input_errors);
 	$pconfig = $_POST;
-	if ( $pconfig['remove'] ) {
+	if ( $pconfig['Submit'] && $pconfig['Submit'] =="Remove") {
 		
 		// we want to remove dnsmasq
 		
