@@ -54,8 +54,8 @@ else
 	rm sbin/dnsmasq_64
 fi
 cp -r * $DMAS_ROOT/
-mkdir -p /usr/local/www/ext/dnsmasq
-ln -s $DMAS_ROOT/www /usr/local/www/ext/dnsmasq
+mkdir -p /usr/local/www/ext
+ln -s $DMAS_ROOT/dnsmasq /usr/local/www/ext/dnsmasq
 cd /usr/local/www
 # For each of the php files in the extensions folder
 for file in /usr/local/www/ext/dnsmasq/*.php
