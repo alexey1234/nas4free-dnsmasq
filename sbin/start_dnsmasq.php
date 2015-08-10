@@ -5,10 +5,10 @@ if (empty($config['dnsmasq']['rootfolder'])) {echo "DNSMASQ not installed\n"; ex
 
 if ( !is_file( "/etc/rc.d/dnsmasq" )) {$cmd = "install -c -o root -g wheel -m 755 ".$config['dnsmasq']['rootfolder']."sbin/dnsmasq.d /etc/rc.d/dnsmasq";  exec($cmd);} else {}
 if ( !is_link ( "/usr/local/sbin/dnsmasq") ) symlink ( $config['dnsmasq']['rootfolder']."sbin/dnsmasq","/usr/local/sbin/dnsmasq"); else {}
-require_once ($config['dnsmasq']['rootfolder']."www/function.inc");
+require_once ($config['dnsmasq']['rootfolder']."dnsmasq/function.inc");
 dnsmasq_config();
 if ( ! is_dir ( "/usr/local/www/ext") ) mkdir ("/usr/local/www/ext") ; else {}
-if (!is_link( "/usr/local/www/ext/dnsmasq" )) symlink ( $config['dnsmasq']['rootfolder']."www","/usr/local/www/ext/dnsmasq"); else {}
+if (!is_link( "/usr/local/www/ext/dnsmasq" )) symlink ( $config['dnsmasq']['rootfolder']."dnsmasq","/usr/local/www/ext/dnsmasq"); else {}
 
 // create links to webroot
 if (!is_link( "/usr/local/www/extensions_dnsmasq_clients.php") ) symlink ( "/usr/local/www/ext/dnsmasq/extensions_dnsmasq_clients.php","/usr/local/www/extensions_dnsmasq_clients.php");else {}
