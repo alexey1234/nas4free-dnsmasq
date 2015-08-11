@@ -37,7 +37,8 @@ if ($_POST) {
 					if (empty($input_errors)) { 
 					if ( isset($_POST['startadr']) &&  ($_POST['endadr'])) {
 					$config['dnsmasq']['startadr'] =$_POST['startadr']; $config['dnsmasq']['endadr'] =$_POST['endadr']; $config['dnsmasq']['leasecount'] =$_POST['leasecount'];} else {}
-			if (isset($_POST['enabletftp']) ) $config['dnsmasq']['enabletftp'] = TRUE; else unset ($config['dnsmasq']['enabletftp']);
+			if (isset($_POST['enabletftp']) ) $config['dnsmasq']['enabletftp'] = TRUE; else unset ($config['dnsmasq']['enabletftp']);		
+			if (isset($_POST['noresolv']) ) $config['dnsmasq']['noresolv'] = TRUE; else unset ($config['dnsmasq']['noresolv']);
 			 $config['dnsmasq']['tftproot'] =  $_POST['tftproot'];
 			  if ( !empty($_POST['tftpboot']) && strlen ($_POST['tftpboot']) > 3 ) { $config['dnsmasq']['tftpboot'] =$_POST['tftpboot'];} else {unset ( $config['dnsmasq']['tftpboot']);}
 			  write_config();
@@ -56,6 +57,7 @@ if ($_POST) {
 $pconfig['enable'] = isset($config['dnsmasq']['enable']) ? true : false;
 $pconfig['extconfig'] = isset ($config['dnsmasq']['extconfig']) ? true : false;
 $pconfig['logging'] = $config['dnsmasq']['logging'];
+$pconfig['noresolv'] = isset ($config['dnsmasq']['noresolv']) ? true : false;
 $pconfig['startadr'] = $config['dnsmasq']['startadr'];
 $pconfig['endadr'] = $config['dnsmasq']['endadr'];
 $pconfig['leasecount'] = $config['dnsmasq']['leasecount'];
@@ -140,7 +142,8 @@ $(document).ready(function () {
 		<?php html_inputbox("startadr", gettext("DHCP range - start"), $pconfig['startadr'], gettext("Choice start adress for DHCP hosts"), false, 16,false);?>
 		<?php html_inputbox("endadr", gettext("DHCP range - end"), $pconfig['endadr'], gettext("Choice end adress for DHCP hosts"), false, 16,false);?>
 		<?php html_inputbox("leasecount", gettext("How leases allow"), !empty($pconfig['leasecount']) ? $pconfig['leasecount'] : "150", gettext("Set the limit on DHCP leases, the default is 150"), false, 16,false);?>
-		<?php html_checkbox("extconfig", gettext("Allow external config"), $pconfig['extconfig'], gettext("Allow support for external config files. Config files may have any name, exclude *.bak and placed into <b>".$config['dnsmasq']['rootfolder']."conf</b> folder"),"","","enable_booting(false)");?>
+		<?php html_checkbox("extconfig", gettext("Allow external config"), $pconfig['extconfig'], gettext("Allow support for external config files. Config files may have any name, exclude *.bak and placed into <b>".$config['dnsmasq']['rootfolder']."conf</b> folder"),"","","");?>
+		<?php html_checkbox("noresolv", gettext("No read /etc/resolv.conf"), $pconfig['noresolv'], gettext("No read resolver file. This option may be checked, if need AD integration or define nameservers over scripts"),"","","");?>
 		<?php html_combobox("logging", gettext("Log configuration"), $pconfig['logging'], array("mini" => gettext("System only"), "dhcp" => gettext("System+DHCP queries"), "all" => gettext("DNS+DHCP+Systems")), "", false, false, "" );?>
 		<?php html_inputbox("tftpboot", gettext("Boot kernel name"), $pconfig['tftpboot'], gettext("Define first boot kernel name"), false, 60,false);?>
 		<?php html_separator(); ?>
