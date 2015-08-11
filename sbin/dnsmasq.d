@@ -39,7 +39,15 @@ dnsmasq_conf=${dnsmasq_conf-"${dnsmasq_conf_dir}/${name}.conf"}
 
 : ${dnsmasq_restart="YES"}
 command="/usr/local/sbin/${name}"
-command_args="-x $pidfile -C $dnsmasq_conf"
+
+_sambaad==`configxml_isset "//sambaad/enable"`
+
+if [ -z ${_sambaad} ]; then
+	dnsmasqport=""
+else
+	dnsmasqport="-p 5354"
+fi
+command_args="-x $pidfile -C $dnsmasq_conf ${dnsmasqport}"
 
 reload_pre() {
         if [ "$dnsmasq_conf" -nt "${timestamp}" ] ; then
@@ -103,6 +111,12 @@ dhcp-option=42,0.0.0.0
 dhcp-option=28,${_broadcast}
 # Setting over NAS4Free webGUI
 EOF
+_noresolv=`/usr/local/bin/xml sel -t -v "count(//dnsmasq/noresolv)" /conf/config.xml`
+
+if [ 0 -ne "${_noresolv}" ]; then
+	echo "no-resolv" >> ${dnsmasq_conf};
+	echo "no-poll" >> ${dnsmasq_conf};
+fi
 if [ -n "${_startaddr}" ] &&  [ -n "${_endaddr}" ] ; then 
 		echo 'dhcp-range='${_startaddr}','${_endaddr}',10m'  >> ${dnsmasq_conf}
 		echo 'dhcp-lease-max='${_leasemax}  >> ${dnsmasq_conf}
@@ -128,7 +142,7 @@ xml sel -t \
 xml sel -t \
 	-i "count(//dnsmasq/enabletftp) > 0" -o "enable-tftp" -n -b \
 	${configxml_file} | /usr/local/bin/xml unesc >> ${dnsmasq_conf}
-#todo - need correct path into php file
+
 xml sel -t \
 	-i "string-length(//dnsmasq/tftproot) > 3" -o "tftp-root=" -v "//dnsmasq/tftproot" -n -b \
 	${configxml_file} | /usr/local/bin/xml unesc >> ${dnsmasq_conf}
