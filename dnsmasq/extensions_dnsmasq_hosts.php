@@ -5,7 +5,7 @@ extensions_dnsmasq_host.php
 unset($warning_mess);
 require("auth.inc");
 require("guiconfig.inc");
-include_once ($config['dnsmasq']['rootfolder']."www/function.inc");
+include_once ($config['dnsmasq']['rootfolder']."dnsmasq/function.inc");
 // $dhcpd_conf = read_dhcpconf($config['dhcplight']['homefolder']."conf/dhcpd.conf");
 if (isset($_GET['uuid']))
 	$uuid = $_GET['uuid'];
