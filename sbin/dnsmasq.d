@@ -40,9 +40,9 @@ dnsmasq_conf=${dnsmasq_conf-"${dnsmasq_conf_dir}/${name}.conf"}
 : ${dnsmasq_restart="YES"}
 command="/usr/local/sbin/${name}"
 
-_sambaad==`configxml_isset "//sambaad/enable"`
+_sambaad=`/usr/local/bin/xml sel -t -v "count(//sambaad/enable)" /conf/config.xml`
 
-if [ -z ${_sambaad} ]; then
+if [ 0 -eq "${_sambaad}" ]; then
 	dnsmasqport=""
 else
 	dnsmasqport="-p 5354"
