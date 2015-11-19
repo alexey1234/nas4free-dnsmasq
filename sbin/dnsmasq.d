@@ -134,7 +134,7 @@ case ${_logging} in
 			;;
 esac
 xml sel -t \
-	-i "count(//dnsmasq/extconfig) > 0" -o "conf-dir=" -v "//dnsmasq/rootfolder" -o "conf" -n -b \
+	-i "count(//dnsmasq/extconfig) > 0" -o "conf-dir=" -v "//dnsmasq/rootfolder" -o "conf/dnsmasq" -n -b \
 	${configxml_file} | /usr/local/bin/xml unesc >> ${dnsmasq_conf}
 xml sel -t \
 	-i "string-length(//dnsmasq/tftpboot) > 3" -o "dhcp-boot=" -v "//dnsmasq/tftpboot" -n -b \
