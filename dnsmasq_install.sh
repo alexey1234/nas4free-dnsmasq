@@ -58,7 +58,7 @@ tar -xzf dnsmasq*.txz
 cd ../..
 rm -f sbin/dmsmasq_64
 rm -f sbin/dmsmasq_86
-cp tmp/All/usr/local/sbin/dnsmasq sbin/dmsmasq
+cp tmp/All/usr/local/sbin/dnsmasq sbin/dnsmasq
 rm -fr tmp
 
 
