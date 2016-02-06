@@ -67,7 +67,7 @@ _rootfolder=`configxml_get "//dnsmasq/rootfolder"`
 if [ ! -z $_rootfolder ]; then
 # Update current config
 	DMAS_ROOT=$_rootfolder
-	/etc/rc.d/dnsmasq stop
+	/etc/rc.d/dnsmasq onestop
 	rm -f /usr/local/sbin/dnsmasq
 	rm -f /etc/rc.d/dnsmasq
 	cp -f -R $START_FOLDER/temporary/* $DMAS_ROOT/
