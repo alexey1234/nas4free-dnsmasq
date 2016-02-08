@@ -71,6 +71,8 @@ if [ ! -z $_rootfolder ]; then
 	rm -f /usr/local/sbin/dnsmasq
 	rm -f /etc/rc.d/dnsmasq
 	cp -f -R $START_FOLDER/temporary/* $DMAS_ROOT/
+	ln -s $DMAS_ROOT/sbin/dnsmasq /usr/local/sbin/dnsmasq
+	ln -s $DMAS_ROOT/sbin/dnsmasq.d /etc/rc.d/dnsmasq
 else
 	echo "Look like fresh install"
 	cp -f -R $START_FOLDER/temporary/* $DMAS_ROOT/
