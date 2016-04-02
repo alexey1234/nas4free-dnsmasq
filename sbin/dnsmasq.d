@@ -88,7 +88,7 @@ dnsmasq_mkconf()
 	_endaddr=`configxml_get "//dnsmasq/endadr"`
 	_leasemax=`configxml_get "//dnsmasq/leasecount"`
 	_logging=`configxml_get "//dnsmasq/logging"`
-	_broadcast=`/sbin/ifconfig ${_interface} |  grep broadcast | awk '{print \$6}'`
+	_broadcast=`/sbin/ifconfig ${_interface} | grep ${_listenadress} | grep broadcast | awk '{print \$6}'`
 
 	cat << EOF > ${dnsmasq_conf}
 # Defaults
