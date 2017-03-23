@@ -7,7 +7,7 @@ $rootfolder = $config['dnsmasq']['rootfolder'];
 $dhcphost="";
 // copy part of config in temporary array
 $dnsmasqhosts = $config['dnsmasq']['hosts'];
-$file = "/etc/dnsmasq.conf";
+$file = "/var/etc/dnsmasq.conf";
 $handle=fopen($file, "w+");
 // defaults
 fwrite ($handle, "#Defaults\nlog-facility=/var/log/dnsmasq.log\ndhcp-leasefile=/var/db/dnsmasq.leases\nuser=nobody\ngroup=nobody\ndomain-needed\nbogus-priv\ndomain=local\nexpand-hosts\nlocal=/local/\ndhcp-option=23,50\ndhcp-authoritative\n");

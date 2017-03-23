@@ -140,7 +140,7 @@ esac
 	-i "string-length(//dnsmasq/tftpboot) > 3" -o "dhcp-boot=" -v "//dnsmasq/tftpboot" -n -b \
 	${configxml_file} | /usr/local/bin/xml unesc >> ${dnsmasq_conf}
 /usr/local/bin/xml sel -t \
-	-i "count(//dnsmasq/enabletftp) > 0" -o "enable-tftp" -n -b \
+	-i "count(//dnsmasq/enabletftp) > 1" -o "enable-tftp" -n -b \
 	${configxml_file} | /usr/local/bin/xml unesc >> ${dnsmasq_conf}
 
 /usr/local/bin/xml sel -t \
@@ -156,7 +156,7 @@ while [ ${_index} -gt 0 ]
 	-i "string-length(macaddr) > 3" -v "concat(macaddr,',')" -b \
 	-i "string-length(ipadress) > 3" -v "concat(ipadress,',')" -b \
 	-i "string-length(hostname) > 3" -v "concat(hostname,',')" -b \
-	-i "string-length(leasetime) > 0" -v "leasetime" --else -o "15m" -b -n \
+	-i "string-length(leasetime) > 0" -v "concat(leasetime,'m')" --else -o "15m" -b -n \
 	-b \
 	${configxml_file} | /usr/local/bin/xml unesc >> ${dnsmasq_conf}
 	_index=$(( ${_index} - 1 ))

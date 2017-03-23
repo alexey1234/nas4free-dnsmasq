@@ -1,246 +1,186 @@
 <?php
 /*
 extensions_dnsmasq_host.php
+variables:
+
 */
-unset($warning_mess);
 require("auth.inc");
 require("guiconfig.inc");
-include_once ($config['dnsmasq']['rootfolder']."dnsmasq/function.inc");
-// $dhcpd_conf = read_dhcpconf($config['dhcplight']['homefolder']."conf/dhcpd.conf");
-if (isset($_GET['uuid']))
-	$uuid = $_GET['uuid'];
-if (isset($_POST['uuid']))
-	$uuid = $_POST['uuid'];
-
-if ( !isset($config['dnsmasq']['hosts']) || !is_array($config['dnsmasq']['hosts']) )
-	$config['dnsmasq']['hosts'] = array();
-
-array_sort_key($config['dnsmasq']['hosts'], "hostno");
-$a_hosts = &$config['dnsmasq']['hosts'];
-if ($_GET) {
-if (isset($_GET['act']) && ($_GET['act'] === "del")) {
-		$number = $_GET['uuid'];
-$cnid = array_search_ex($number, $config['dnsmasq']['hosts'], "uuid");
-			if (false !== $cnid) {
-			unset($config['dnsmasq']['hosts'][$cnid]);
-				write_config();
-				mwexec ("touch /var/run/dnsmasq.reload");
-			}
-		
-		// write_dhcpconf($dhcpd_conf, $config['dhcplight']['homefolder']."conf/dhcpd.conf");
-		header("Location: extensions_dnsmasq_server.php");
-		}
-if (isset($_GET['act']) && ($_GET['act'] === "edit")) { $uuid = $_GET['uuid'];
-
-if (FALSE !== ($cnid = array_search_ex($uuid, $a_hosts, "uuid"))) {
-	$pconfig['uuid'] = $a_hosts[$cnid]['uuid'];
-	$pconfig['macaddr'] = $a_hosts[$cnid]['macaddr'];
-	$pconfig['ipadress'] = $a_hosts[$cnid]['ipadress'];
-	$pconfig['hostname'] = $a_hosts[$cnid]['hostname'];
-	$pconfig['leasetime'] = $a_hosts[$cnid]['leasetime'];
-	$pconfig['mode'] = "edit";
-	$pconfig['hostno'] = $a_hosts[$cnid]['hostno'];
+if (isset($config['dnsmasq']['hosts']) && is_array($config['dnsmasq']['hosts']) ) {
+		$a_hosts = &$config['dnsmasq']['hosts']; 
+	} else { 
+		$config['dnsmasq']['hosts'] =array(); 
 	}
-	}
-else {
+
+unset($host);
+$etc_hosts = &array_make_branch($config,'system','hosts');
+			if(empty($etc_hosts)):
+			else:
+				array_sort_key($etc_hosts,'name');
+			endif;	
+
+
+
+
+	//GET
+if (isset($_GET) && $_GET['act'] == "new") {
+	
 	$pconfig['uuid'] = uuid();
+	
 	$pconfig['macaddr'] = "";
 	$pconfig['ipadress'] = "";
 	$pconfig['hostname'] = "";
-	$pconfig['leasetime'] = "60";
-	$pconfig['mode'] = "new";
-	$pconfig['hostno'] = dnsmasq_get_next_hostno();
-	}
-}	
-If ($_POST) {
+	$pconfig['leasetime'] = "";
 
-	unset($input_errors);
-	if (isset($_POST['Submit']) && ($_POST['Submit']=== "Cancel" )) { 	header("Location: extensions_dnsmasq_server.php"); }
-	if (isset($_POST['Submit']) && ($_POST['Submit'] === "Save")) { 
-$pconfig = $_POST;
-	// Input validation
-// All defined
-	if ( ! empty($_POST['macaddr']) && ! empty($_POST['ipadress']) && ! empty($_POST['hostname'] )) { 
-		$reqdfields = explode(" ", "macaddr ipadress hostname");
-		$reqdfieldsn = array(gettext("MAC adress"), gettext("IP adress"), gettext("hostname"));
-		$reqdfieldst = explode(" ", "macaddr ipaddr hostname");
-		
-		do_input_validation($_POST, $reqdfields, $reqdfieldsn, $input_errors);
-		do_input_validation_type($_POST, $reqdfields, $reqdfieldsn, $reqdfieldst, $input_errors);
-		if ($_POST['mode'] == "new") {
-		if (is_macaddr($_POST['macaddr'])) {
-			if ( is_array ($a_hosts)) {  
-			$index = array_search_ex($_POST['macaddr'], $a_hosts, "macaddr");	
-			if ( FALSE !==  ($index = array_search_ex($_POST['macaddr'], $a_hosts, "macaddr"))) { $input_errors[] = "MAC adress exist. It must be unique"; goto out;} else {} } else {} } } 
-		$subnet = $config['interfaces']['lan']['ipaddr']."/".$config['interfaces']['lan']['subnet'];
-		if (is_ipaddr ($_POST['ipadress'])) { if (false == ($cnif =ip_in_subnet($_POST['ipadress'] ,$subnet))) {$input_errors[] = "Value \"IP address\" is not belongs to the subnet LAN"; goto out;} else {} }
-		$nas4frehosts = &$config['system']['hosts'];
-		if (false !==($cnin = array_search_ex($_POST['hostname'],$nas4frehosts,"name"))) { $warning_mess="Host defined on <a href=system_hosts.php>/etc/hosts</a>. I clear entries MAC and IP adress and make leasetime <b>infinite</b>";
-		if (  $_POST['hostname'] == $config['system']['hostname'] ) {$input_errors[] = "You can not define main host as DHCP client"; goto out;} else {
-		$pconfig['ipadress'] ="";
-		$pconfig['leasetime'] ="infinite";
-		$pconfig['macaddr'] ="";
-		} }
-		else { 
-			if (  $_POST['hostname'] == $config['system']['hostname'] ) {$input_errors[] = "You can not define main host as DHCP client"; goto out;} else {
-		  
-$warning_mess="Host NOT defined on <a href=system_hosts.php>/etc/hosts</a>, If you want  define it you can do it  now.";}
-		  }
-		}
-//All empty
-	elseif  ( empty($_POST['macaddr']) &&  empty($_POST['ipadress']) &&  empty($_POST['hostname'] )) {
-		  $input_errors[] = "Need define anything"; goto out;}
-// only IP defined
-	elseif   ( empty($_POST['macaddr']) &&  !empty($_POST['ipadress']) &&  empty($_POST['hostname'] )) {
-		    $input_errors[] = "Need define Hostname or MAC addres "; goto out; }
-// Defined ip and hostname.  Need entry to /etc/host
-	elseif   ( empty($_POST['macaddr']) &&  !empty($_POST['ipadress']) &&  !empty($_POST['hostname'] )) {
-		      $reqdfields = explode(" ", "ipadress hostname");
-		      $reqdfieldsn = array(gettext("IP adress"), gettext("hostname"));
-		      $reqdfieldst = explode(" ", "ipaddr hostname");
-		
-		      do_input_validation($_POST, $reqdfields, $reqdfieldsn, $input_errors);
-		      do_input_validation_type($_POST, $reqdfields, $reqdfieldsn, $reqdfieldst, $input_errors); 
-		      
-			$nas4frehosts = &$config['system']['hosts'];
-			if (false !==($cnif = array_search_ex($_POST['hostname'],$nas4frehosts,"name"))) { 
-				if (  $_POST['hostname'] == $config['system']['hostname'] ) {$input_errors[] = "You can not define main host as DHCP client"; goto out;} else {
-					$pconfig['ipadress'] ="";
-					$warning_mess="Host defined on <a href=system_hosts.php>/etc/hosts</a>. I  clear IP entry "; }
-					      }
-				else { 
-					if (  $_POST['hostname'] == $config['system']['hostname'] ) {$input_errors[] = "You can not define main host as DHCP client"; goto out;} else {
-						$pconfig['ipadress'] ="";
-						$warning_mess="Host NOT defined on <a href=system_hosts.php>/etc/hosts</a>, please define it. I clear IP entry";	}
-			}
-	 }
-// MAC without IP,. May be work, but I deny this.	
-	elseif   ( !empty($_POST['macaddr']) &&   empty($_POST['ipadress'])) { 	    
-		       $input_errors[] = "If you define MAC addres, you  must define IP address for it."; goto out; }
-// MAC + Ip.
-	elseif   ( !empty($_POST['macaddr']) && ! empty($_POST['ipadress']) && empty($_POST['hostname'] )) { 
-		   $reqdfields = explode(" ", "macaddr ipadress");
-		   $reqdfieldsn = array(gettext("MAC adress"), gettext("IP adress"));
-		   $reqdfieldst = explode(" ", "macaddr ipaddr");
-		
-		do_input_validation($_POST, $reqdfields, $reqdfieldsn, $input_errors);
-		do_input_validation_type($_POST, $reqdfields, $reqdfieldsn, $reqdfieldst, $input_errors);
-		if ($_POST['mode'] == "new") {
-		if (is_macaddr($_POST['macaddr'])) {
-			if ( is_array ($a_hosts)) {  
-			$index = array_search_ex($_POST['macaddr'], $a_hosts, "macaddr");	
-			if ( FALSE !==  ($index = array_search_ex($_POST['macaddr'], $a_hosts, "macaddr"))) { $input_errors[] = "MAC adress exist. It must be unique"; goto out;} else {} } else {} }  }
-		$subnet = $config['interfaces']['lan']['ipaddr']."/".$config['interfaces']['lan']['subnet'];
-		if (is_ipaddr ($_POST['ipadress'])) { 
-				if (false == ($cnif =ip_in_subnet($_POST['ipadress'],$subnet))) {$input_errors[] = "Value \"IP address\" is not belongs to the subnet LAN"; goto out;} else {} }
-		} 
-// Only hostname.  Need entry to /etc/hosts
-      	elseif   ( empty($_POST['macaddr']) &&  empty($_POST['ipadress']) && !empty($_POST['hostname'] )) { 
-		  if (FALSE == is_hostname($_POST['hostname'])) {$input_errors[] = "Wrong Host name."; goto out;} 
-		  else {
-			$pconfig['leasetime'] ="60";
-			$nas4frehosts = &$config['system']['hosts'];
-			if (false !==($cnin = array_search_ex($_POST['hostname'],$nas4frehosts,"name"))) { $warning_mess="Host defined on <a href=system_hosts.php>/etc/hosts</a>";}
-			else { 
-			      if (  $_POST['hostname'] == $config['system']['hostname'] ) {$input_errors[] = "You can not define main host as DHCP client"; goto out;} else {
-			      $warning_mess="Host NOT defined on <a href=system_hosts.php>/etc/hosts</a>, please define it";	} 
-			} }
 }
-// Make unknown error for all other combinations
-	else 	{$input_errors[] = "Unknown error"; goto out;}
-
+if (isset($_GET) && $_GET['act'] == "edit") {
+	if (isset($_GET['uuid']) && (FALSE !== ($cnid = array_search_ex($_GET['uuid'], $config['dnsmasq']['hosts'], "uuid")))) {
+	$pconfig['uuid'] = $config['dnsmasq']['hosts'][$cnid]['uuid'];
 	
+	$pconfig['macaddr'] = $config['dnsmasq']['hosts'][$cnid]['macaddr'];
+	$pconfig['ipadress'] = $config['dnsmasq']['hosts'][$cnid]['ipadress'];
+	$pconfig['hostname'] = $config['dnsmasq']['hosts'][$cnid]['hostname'];
+	$pconfig['leasetime'] = $config['dnsmasq']['hosts'][$cnid]['leasetime'];
+	
+}
+}
+if (isset($_GET) && $_GET['act'] == "del") {
+	unset ($configchange);
+	$cnid = array_search_ex( $_GET['uuid'], $config['dnsmasq']['hosts'], "uuid");
+	if (FALSE !== $cnid) {	
+		unset($config['dnsmasq']['hosts'][$cnid]); 	
+		$configchange="1"; 
+		}
+	$hostid = array_search_ex($_GET['uuid'], $config['system']['hosts'], "uuid");
+	if (FALSE !== $hostid) {
+		unset($config['system']['hosts'][$hostid]);
+		$configchange="1";
+		}
+	if ($configchange) { 
+	updatenotify_set("dnsmasq", UPDATENOTIFY_MODE_DIRTY, $_GET['uuid']);
+	write_config();
+	}
+	echo "<script>window.opener.location.reload(); window.close();</script>";
+}
+if ($_POST) {
+	unset ($input_errors);
+	file_put_contents ("/tmp/post", serialize ($_POST));
+	$pconfig = $_POST;
+	if ( isset($_POST['act']) && $_POST['act'] == "new") {
+	//validation
+	if ( is_array ($a_hosts)) {  
+		if ( FALSE !==  ($index = array_search_ex($_POST['macaddr'], $a_hosts, "macaddr"))) { 
+				$input_errors[] = "MAC address duplicate. It must be unique"; goto out; }
+		if ( FALSE !==  ($index = array_search_ex($_POST['ipadress'], $a_hosts, "ipadress"))) { 
+				$input_errors[] = "IP address duplicate. It must be unique"; goto out; }
+		if ($_POST['ipadress'] == $config['interfaces']['lan']['ipaddr'] ) { 
+				$input_errors[] = "IP address is LAN IP address. Wow!! "; goto out; }
+		if ( FALSE !==  ($index = array_search_ex($_POST['hostname'], $a_hosts, "hostname"))) { 
+				$input_errors[] = "Hostname duplicate. It must be unique"; goto out; }
+			// Check add host to system
+		if ( FALSE !==  ($index = array_search_ex($_POST['ipadress'], $etc_hosts, "address"))) { 
+					$input_errors[] = "IP address finded into /etc/hosts. Please close this Pop-up and remove entry at /etc/hosts"; goto out; }
+		if ( FALSE !==  ($index = array_search_ex($_POST['hostname'], $etc_hosts, "name"))) { 
+					$input_errors[] = "Hostname finded into /etc/hosts. Please close this Pop-up and remove entry at /etc/hosts"; goto out; }
+			}
+    // End validation
+	}
 	if (empty($input_errors)) {
+	$cnid = array_search_ex($pconfig['uuid'], $config['system']['hosts'], "uuid");
+	
+// add host to /etc/hosts
+	
+	$host = array();
+	$host['uuid'] = $_POST['uuid'];
+	$host['name'] = $_POST['hostname'];
+	$host['address'] = $_POST['ipadress'];
+	$host['descr'] = "dnsmasq host";
+	if (isset($_POST['uuid']) && (FALSE !== $cnid)) {
+			$config['system']['hosts'][$cnid] = $host;			
+		} else {
+		$config['system']['hosts'][] = $host;
+		}
 	$cnid = array_search_ex($pconfig['uuid'], $config['dnsmasq']['hosts'], "uuid");
-	///  PROBLEM
-		$index = array_search_ex($pconfig['hostno'], $a_hosts, "hostno");	
-	if ( FALSE !== $index ) {
-			if (isset($uuid) && (FALSE !== $cnid )){
-				if ( $cnid < $index ){  for ( $i = $cnid; $i <= $index ; $i++ ){ $a_hosts[$i]['hostno'] -= 1; } 	} 
-				elseif ( $cnid > $index ) {  for ( $i = $index; $i < $cnid ; $i++ ){	$a_hosts[$i]['hostno'] += 1;	} } 
-			} 
-			else {  for ( $i = $index; $i < count( $a_hosts ); $i++ ){ $a_hosts[$i]['hostno'] += 1; } } 
-		} 
 	$hosts = array();
 	
 	$hosts['uuid'] = $pconfig['uuid'];
-	$hosts['hostno'] = $pconfig['hostno'];	
+		
 	$hosts['macaddr'] = $pconfig['macaddr'];
 	$hosts['ipadress'] = $pconfig['ipadress'];
 	$hosts['hostname'] = $pconfig['hostname'];
-	
 	$hosts['leasetime'] = $pconfig['leasetime'];
-	
-
-
-
-	if (isset($uuid) && (FALSE !== $cnid)) { $a_hosts[$cnid] = $hosts; $mode = UPDATENOTIFY_MODE_MODIFIED; } 
-	else {	$a_hosts[] = $hosts; $mode = UPDATENOTIFY_MODE_NEW;	}
+	if (isset($_POST['uuid']) && (FALSE !== $cnid)) { 
+		$config['dnsmasq']['hosts'][$cnid] = $hosts; 
+		$mode = UPDATENOTIFY_MODE_MODIFIED; 
+	} else {	
+		$config['dnsmasq']['hosts'][] = $hosts; 
+		$mode = UPDATENOTIFY_MODE_NEW;	
+		}
 	updatenotify_set("dnsmasq", $mode, $hosts['uuid']);
-		write_config();
-		mwexec ("touch /var/run/dnsmasq.reload");
-		file_put_contents("/var/run/dnsmasq.reload", $warning_mess);
-		header("Location: extensions_dnsmasq_server.php");
+	write_config();
+	echo "<script>window.opener.location.reload();window.close();</script>";
 		exit;
 	}
-}	
-}
-
-
-function dnsmasq_get_next_hostno() {
-	global $config;
-	$hostno = 1;
-	$a_hosts = $config['dnsmasq']['hosts'];
-	if (false !== array_search_ex(strval($hostno), $a_hosts, "hostno")) {
-		do {
-			$hostno += 1; 
-		} while (false !== array_search_ex(strval($hostno), $a_hosts, "hostno"));
-	}
-	return $hostno;
-}
-
-out:
-$pgtitle = array(gettext("Extensions"),gettext("Dnsmasq|Host"));
-include("fbegin.inc");
-
-?>
-<table width="100%" border="0" cellpadding="0" cellspacing="0">
-	<tr>
-	<form action="extensions_dnsmasq_hosts.php" method="post" name="iform" id="iform">
-		<td class="tabcont">
-		<?php if (!empty($input_errors)) print_input_errors($input_errors); ?>
-			<table width="100%" border="0" cellpadding="5" cellspacing="0">
-				<tr>
-					<?php html_titleline(gettext("Dynamic Host Configuration Protocol - hosts"));?>
-					
-					<?php html_inputbox("macaddr", gettext("MAC adress"), $pconfig['macaddr'], gettext("Define MAC adress for host"), false, 26,false);?>
-					<?php html_inputbox("ipadress", gettext("IP adress"), $pconfig['ipadress'], gettext("Define IP  adress for host"), false, 16,false);?>
-					<?php html_inputbox("hostname", gettext("Hostname"), $pconfig['hostname'], gettext("Define hostname for host"), false, 16,false);?>
-					<?php html_inputbox("leasetime", gettext("Lease time"), $pconfig['leasetime'], gettext("Define lease time for this host, seconds"), false, 16,false);?>
-					
-					
-		
-				</tr>	
-				
-				<tr>
-				</tr>
-				<tr><td>
-					<div id="submit">
-					<input name="Submit" type="submit" class="formbtn" value="Save" />
-					<input name="hostno" type="hidden" value="<?=$pconfig['hostno'];?>" />
-					<input name="mode" type="hidden" value="<?=$pconfig['mode'];?>" />
-					<input name="uuid" type="hidden" value="<?=$pconfig['uuid'];?>" />
-					<input name="Submit" type="submit" class="formbtn" value="Cancel" />
-					</div>
-				    </td>
-				</tr>
-			
-			</table>
-		</td>
-		<?php include("formend.inc");?>
-		</form>
-	</tr>
-
 	
-</table>
-<?php include("fend.inc"); ?>
+}	
+out:
+header("Content-Type: text/html; charset=" . system_get_language_codeset());
+?>
+<!DOCTYPE html>
+<html lang="<?=system_get_language_code();?>">
+	<head>
+		<meta charset="<?=system_get_language_codeset();?>"/>
+		<title><?=gtext("dnsmasq host");?></title>
+		<link href="css/gui.css" rel="stylesheet" type="text/css">
+		<link href="css/fc.css" rel="stylesheet" type="text/css">
+		<script type="text/javascript" src="/js/jquery.min.js"></script>
+		<script type="text/javascript" src="/js/gui.js"></script>
+		
+    <script type="text/javascript"> 
+		
+    
+    function refreshParent() { window.opener.location.reload(); }
+
+       
+        $(document).ready(function() { 
+            $('#myForm').submit(); 
+			window.onunload = refreshParent;
+        }); 
+		
+	</script> 
+	</head>
+	<body class="filechooser">
+		<table cellspacing="0"><tbody><tr><td class="navbar">
+			
+			<form id="myForm" action="extensions_dnsmasq_hosts.php" method="post"> 
+			
+			<table>
+				<tr>
+					<td>MAC: </td>
+					<td><input type="text" placeholder="MAC" name="macaddr" required pattern="^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$" title="Please enter valid MAC address" value="<?=$pconfig['macaddr']; ?>" /></td>
+				</tr>
+				<tr>
+					<td>IP adress: </td>
+					<td><input type="text" name="ipadress" placeholder="IP" required pattern="^(25[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}$" title="Please enter valid IP address" value="<?=$pconfig['ipadress']; ?>" /></td>
+				</tr>
+				<tr>
+					<td>Hostname: </td>
+					<td><input type="text" name="hostname" placeholder="hostname" required pattern="^[a-z0-9\-]+$" title="Please enter valid hostname" value="<?=$pconfig['hostname']; ?>" /></td>
+				</tr>
+				<tr>
+					<td>Lease time: </td>
+					<td><input type="text" name="leasetime" placeholder="time, minutes or infinite" required pattern="^[0-9\-]+$" || "^infinite" title="Please enter lease time for host in minutes or infinite" value="<?=$pconfig['leasetime']; ?>" /></td>
+				</tr>
+				<tr>
+					<td><input type="submit" name="submit" value="Save" />
+						<input name="uuid" type="hidden" value="<?php echo $_GET['uuid']; ?>" />
+						<input name="act" type="hidden" value="<?php echo $_GET['act']; ?>" />
+					</td>
+					
+				</tr>
+			</table>
+			<?php include 'formend.inc'; ?>
+			</form>	</td></tr></tbody>
+		</table>
+	</body>
+</html>
