@@ -66,4 +66,22 @@ global $config;
 $subnet = $config['interfaces']['lan']['ipaddr']."/".$config['interfaces']['lan']['subnet'];
 if (TRUE == ($cnid=ip_in_subnet($ipaddr,$subnet)) ) return TRUE; else return FALSE;
 }
-
+function delete_dnsmasqhost ($uuid) {
+	global $config;
+	unset ($configchange);
+	$cnid = array_search_ex($uuid, $config['dnsmasq']['hosts'], "uuid");
+	if (FALSE !== $cnid) {	
+		unset($config['dnsmasq']['hosts'][$cnid]); 	
+		$configchange="1"; 
+		}
+	$hostid = array_search_ex($uuid, $config['system']['hosts'], "uuid");
+	if (FALSE !== $hostid) {
+		unset($config['system']['hosts'][$hostid]);
+		$configchange="1";
+		}
+	if (isset($configchange)) {
+		return true;
+	} else {
+		return false;
+	}
+}

@@ -74,6 +74,7 @@ timestampconf() {
 
 rmtimestamp() {
         rm -f "${timestamp}"
+		rm -f "${pidfile}"
 }
 
 dnsmasq_mkconf()
@@ -87,6 +88,7 @@ dnsmasq_mkconf()
 	_startaddr=`configxml_get "//dnsmasq/startadr"`
 	_endaddr=`configxml_get "//dnsmasq/endadr"`
 	_leasemax=`configxml_get "//dnsmasq/leasecount"`
+	_leasetime=`configxml_get "//dnsmasq/leasetime"`
 	_logging=`configxml_get "//dnsmasq/logging"`
 	_broadcast=`/sbin/ifconfig ${_interface} |  grep broadcast | awk '{print \$6}'`
 
@@ -118,7 +120,7 @@ if [ 0 -ne "${_noresolv}" ]; then
 	echo "no-poll" >> ${dnsmasq_conf};
 fi
 if [ -n "${_startaddr}" ] &&  [ -n "${_endaddr}" ] ; then 
-		echo 'dhcp-range='${_startaddr}','${_endaddr}',10m'  >> ${dnsmasq_conf}
+		echo 'dhcp-range='${_startaddr}','${_endaddr}','${_leasetime}  >> ${dnsmasq_conf}
 		echo 'dhcp-lease-max='${_leasemax}  >> ${dnsmasq_conf}
 fi
 case ${_logging} in
@@ -156,7 +158,7 @@ while [ ${_index} -gt 0 ]
 	-i "string-length(macaddr) > 3" -v "concat(macaddr,',')" -b \
 	-i "string-length(ipadress) > 3" -v "concat(ipadress,',')" -b \
 	-i "string-length(hostname) > 3" -v "concat(hostname,',')" -b \
-	-i "string-length(leasetime) > 0" -v "concat(leasetime,'m')" --else -o "15m" -b -n \
+	-i "string-length(leasetime) > 0" -v "leasetime" -b -n \
 	-b \
 	${configxml_file} | /usr/local/bin/xml unesc >> ${dnsmasq_conf}
 	_index=$(( ${_index} - 1 ))
