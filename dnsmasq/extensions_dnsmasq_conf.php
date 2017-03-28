@@ -16,20 +16,17 @@ if (!isset($config['dnsmasq']['rootfolder']) ) {
 		} 
 	} else { $pconfig['rootfolder'] = $config['dnsmasq']['rootfolder'] ;}
 	
-if ($_POST) {
-	
+if ($_POST) {	
 	unset($input_errors);
 	$pconfig = $_POST;
 	if ( $pconfig['Submit'] && $pconfig['Submit'] =="Remove") {
 		
 		// we want to remove dnsmasq
 		
-		$i = 0;
- 		if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
- 			for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
- 			if (true == ($cnid = preg_match('/start_dnsmasq/', $config['rc']['postinit']['cmd'][$i]))) unset($config['rc']['postinit']['cmd'][$i]);	else {}
-				} 
-		}
+		$a_param = &$config['rc']['param'];
+			if (FALSE !== ($parid = array_search_ex("Dnsmasq startup script", &$config['rc']['param'], "name"))) {
+				unset ( $config['rc']['param'][$parid]);		//  delete old input for new scheme		
+			}
 		foreach ( glob( "{$config['dnsmasq']['rootfolder']}conf/ext/dnsmasq/*.php" ) as $file ) {
  			$file = str_replace("{$config['dnsmasq']['rootfolder']}conf/ext/dnsmasq", "/usr/local/www", $file);
  			if ( is_link( $file ) ) { unlink( $file ); 	} 
@@ -53,13 +50,22 @@ if ($_POST) {
 	if ( !$input_errors ){ 
 	$config['dnsmasq']['rootfolder'] = $pconfig['rootfolder'];
 	// Add startup command
-	$i = 0;
-	if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
-		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
-			if (false == ($cnid = preg_match('/start_dnsmasq/', $config['rc']['postinit']['cmd'][$i]))) {} else { break;}			
-		 	}
-			$config['rc']['postinit']['cmd'][$i] = "/usr/local/bin/php-cgi {$config['dnsmasq']['rootfolder']}sbin/start_dnsmasq.php";
-		} 
+	$startup_record['param']['uuid'] = uuid();
+	$startup_record['param']['enable'] = true;
+	$startup_record['param']['protected'] = false;
+	$startup_record['param']['name'] = 'Dnsmasq startup script';
+	$startup_record['param']['value'] = "/usr/local/bin/php-cgi ".$config['dnsmasq']['rootfolder']."sbin/start_dnsmasq.php";
+	$startup_record['param']['comment'] = '';
+	$startup_record['param']['typeid'] = '2';
+	if ( ! is_array($config['rc']['param'] ) ) {
+			$config['rc']['param'] = array();
+	} else {
+		$a_param = &$config['rc']['param'];
+		if (FALSE !== ($parid = array_search_ex("Thebrig startup script", $a_param, "name"))) {
+			unset ( $a_param[$parid]);		//  delete old input for new scheme		
+		}
+	}
+	$config['rc']['param'] = array_merge_recursive ($config['rc']['param'], $sphere_record );
 	write_config();
 	unlink_if_exists("/tmp/dnsmasq.tmp");
 	if ( !is_link( "/etc/rc.d/dnsmasq" )) {symlink ( $config['dnsmasq']['rootfolder']."sbin/dnsmasq.d","/etc/rc.d/dnsmasq");} else {}
@@ -74,10 +80,8 @@ $pgtitle = array(gettext("Extensions"),gettext("DNSMASQ"), gettext("config"));
 include("fbegin.inc"); ?>
 <script language="JavaScript">
 
-function message(obj) {
-	
+function message(obj) {	
 		alert('If you want to uninstall the DNSMASQ, please make sure that all files have been removed');
-
 		return true;
 }
 </script>
