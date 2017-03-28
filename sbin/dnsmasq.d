@@ -90,7 +90,7 @@ dnsmasq_mkconf()
 	_leasemax=`configxml_get "//dnsmasq/leasecount"`
 	_leasetime=`configxml_get "//dnsmasq/leasetime"`
 	_logging=`configxml_get "//dnsmasq/logging"`
-	_broadcast=`/sbin/ifconfig ${_interface} |  grep broadcast | awk '{print \$6}'`
+	_broadcast=`configxml_get "//dnsmasq/broadcast"`
 
 	cat << EOF > ${dnsmasq_conf}
 # Defaults

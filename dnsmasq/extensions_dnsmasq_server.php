@@ -27,9 +27,9 @@ if ($_POST) {
 					}
 			    else {
 					// Input validation
-					$reqdfields = explode(" ", "startadr endadr leasecount");
-					$reqdfieldsn = array(gettext("DHCP range - start"), gettext("DHCP range - end"), gettext("How leases allow"));
-					$reqdfieldst = explode(" ", "ipaddr ipaddr numeric");
+					$reqdfields = explode(" ", "startadr endadr broadcast leasecount");
+					$reqdfieldsn = array(gettext("DHCP range - start"), gettext("DHCP range - end"), gettext("Broadcast address"), gettext("How leases allow"));
+					$reqdfieldst = explode(" ", "ipaddr ipaddr ipaddr numeric");
 					do_input_validation($_POST, $reqdfields, $reqdfieldsn, $input_errors);
 					do_input_validation_type($_POST, $reqdfields, $reqdfieldsn, $reqdfieldst, $input_errors);
 					$subnet = $config['interfaces']['lan']['ipaddr']."/".$config['interfaces']['lan']['subnet'];
@@ -37,11 +37,14 @@ if ($_POST) {
 						if (false == ($cnif =ip_in_subnet($_POST['startadr'],$subnet))) {$input_errors[] = "Value \"DHCP range - start\" is not belongs to the subnet LAN"; goto out;} else {} }
 					if (is_ipaddr ($_POST['endadr'])) { 
 						if (false == ($cnif =ip_in_subnet($_POST['endadr'],$subnet))) {$input_errors[] = "Value \"DHCP range - end\" is not belongs to the subnet LAN"; goto out;} else {} }
+					if (is_ipaddr ($_POST['broadcast'])) { 
+						if (false == ($cnif =ip_in_subnet($_POST['broadcast'],$subnet))) {$input_errors[] = "Value \"Broadcast address\" is not belongs to the subnet LAN"; goto out;} else {} }
 					}
 				if (empty($input_errors)) { 
 					if ( isset($_POST['startadr']) &&  ($_POST['endadr'])) {
 						$config['dnsmasq']['startadr'] =$_POST['startadr']; 
-						$config['dnsmasq']['endadr'] =$_POST['endadr']; 
+						$config['dnsmasq']['endadr'] =$_POST['endadr'];
+						$config['dnsmasq']['broadcast'] =$_POST['broadcast'];
 						$config['dnsmasq']['leasecount'] =$_POST['leasecount'];
 						$config['dnsmasq']['leasetime'] =$_POST['leasetime'];
 						}
@@ -104,6 +107,7 @@ $pconfig['logging'] = $config['dnsmasq']['logging'];
 $pconfig['noresolv'] = isset ($config['dnsmasq']['noresolv']) ? true : false;
 $pconfig['startadr'] = $config['dnsmasq']['startadr'];
 $pconfig['endadr'] = $config['dnsmasq']['endadr'];
+$pconfig['broadcast'] = $config['dnsmasq']['broadcast'];
 $pconfig['leasecount'] = $config['dnsmasq']['leasecount'];
 $pconfig['leasetime'] = $config['dnsmasq']['leasetime'];
 $pconfig['enabletftp'] = $config['dnsmasq']['enabletftp'];
@@ -178,6 +182,7 @@ function enable_tftp() {
 			
 		<?php html_inputbox("startadr", gettext("DHCP range - start"), $pconfig['startadr'], gettext("Choice start adress for DHCP hosts"), false, 16,false);?>
 		<?php html_inputbox("endadr", gettext("DHCP range - end"), $pconfig['endadr'], gettext("Choice end adress for DHCP hosts"), false, 16,false);?>
+		<?php html_inputbox("broadcast", gettext("Broadcast address"), $pconfig['broadcast'], gettext("Define broadcast address."), false, 16,false);?>
 		<?php html_inputbox("leasecount", gettext("How leases allow"), !empty($pconfig['leasecount']) ? $pconfig['leasecount'] : "50", gettext("Set the limit on DHCP leases, the default is 50"), false, 16,false);?>
 		<?php html_inputbox("leasetime", gettext("Lease time for network"), !empty($pconfig['leasetime']) ? $pconfig['leasetime'] : "30m", gettext("Set the time for DHCP leases, m or h is minutes or hours"), false, 16,false);?>
 		<?php html_checkbox("extconfig", gettext("Allow external config"), $pconfig['extconfig'], gettext("Allow support for external config files. Config files may have any name, exclude *.bak and placed into <b>".$config['dnsmasq']['rootfolder']."conf</b> folder"),"","","");?>
