@@ -22,10 +22,12 @@ if ($_POST) {
 	if ( $pconfig['Submit'] && $pconfig['Submit'] =="Remove") {
 		
 		// we want to remove dnsmasq
-		
+		array_sort_key($config['rc']['param'], "name");
 		$a_param = &$config['rc']['param'];
-			if (FALSE !== ($parid = array_search_ex("Dnsmasq startup script", &$config['rc']['param'], "name"))) {
-				unset ( $config['rc']['param'][$parid]);		//  delete old input for new scheme		
+			if (FALSE !== ($parid = array_search_ex("Dnsmasq startup script", $a_param, "name"))) {
+				unset ( $a_param[$parid]);		/
+				unset ( $config['rc']['param']);
+				$config['rc']['param'] = $a_param;
 			}
 		foreach ( glob( "{$config['dnsmasq']['rootfolder']}conf/ext/dnsmasq/*.php" ) as $file ) {
  			$file = str_replace("{$config['dnsmasq']['rootfolder']}conf/ext/dnsmasq", "/usr/local/www", $file);
@@ -61,11 +63,11 @@ if ($_POST) {
 			$config['rc']['param'] = array();
 	} else {
 		$a_param = &$config['rc']['param'];
-		if (FALSE !== ($parid = array_search_ex("Thebrig startup script", $a_param, "name"))) {
+		if (FALSE !== ($parid = array_search_ex("Dnsmasq startup script", $a_param, "name"))) {
 			unset ( $a_param[$parid]);		//  delete old input for new scheme		
 		}
 	}
-	$config['rc']['param'] = array_merge_recursive ($config['rc']['param'], $sphere_record );
+	$config['rc']['param'] = array_merge_recursive ($config['rc']['param'], $startup_record );
 	write_config();
 	unlink_if_exists("/tmp/dnsmasq.tmp");
 	if ( !is_link( "/etc/rc.d/dnsmasq" )) {symlink ( $config['dnsmasq']['rootfolder']."sbin/dnsmasq.d","/etc/rc.d/dnsmasq");} else {}
