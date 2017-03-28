@@ -1,5 +1,5 @@
 #!/bin/sh
-#Version 0.3
+#Version 0.4
 
 . /etc/rc.subr
 . /etc/util.subr
