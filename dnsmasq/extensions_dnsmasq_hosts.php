@@ -183,7 +183,7 @@ header("Content-Type: text/html; charset=" . system_get_language_codeset());
 				</tr>
 				<tr>
 					<td>Hostname: </td>
-					<td><input type="text" name="hostname" size="30" placeholder="hostname" required pattern="^[a-z0-9\-]+$" title="Please enter valid hostname" value="<?=$pconfig['hostname']; ?>" /></td>
+					<td><input type="text" name="hostname" size="30" placeholder="hostname" required pattern="[a-zA-Z0-9\-]{3;24}" title="Please enter valid hostname" value="<?=$pconfig['hostname']; ?>" /></td>
 				</tr>
 				<tr>
 					<td><input type="submit" name="submit" value="Save" />
