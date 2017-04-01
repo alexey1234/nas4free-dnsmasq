@@ -25,7 +25,7 @@ if ($_POST) {
 		array_sort_key($config['rc']['param'], "name");
 		$a_param = &$config['rc']['param'];
 			if (FALSE !== ($parid = array_search_ex("Dnsmasq startup script", $a_param, "name"))) {
-				unset ( $a_param[$parid]);		/
+				unset ( $a_param[$parid]);
 				unset ( $config['rc']['param']);
 				$config['rc']['param'] = $a_param;
 			}
