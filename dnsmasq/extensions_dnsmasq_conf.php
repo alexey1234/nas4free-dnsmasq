@@ -135,7 +135,7 @@ else if ($savemsg) { print_info_box($savemsg); }
 			fclose($connected);
 			$ctx = stream_context_create(['ssl' => ["verify_peer"=>false,"verify_peer_name"=>false,]]);
 			//$arrContextOptions=array( "ssl"=>array( "verify_peer"=>false, "verify_peer_name"=>false ),);  
-			$gitserverfile = file_get_contents("https://raw.githubusercontent.com/alexey1234/nas4free-dnsmasq/master/dnsmasq_install.sh", false, $ctx);
+			$gitserverfile = file_get_contents("https://raw.githubusercontent.com/alexey1234/nas4free-dnsmasq/working/dnsmasq_install.sh", false, $ctx);
 			file_put_contents("/tmp/dnsmasq_install.sh", $gitserverfile);
 			if (1==preg_match("/^#Ver.+/m", $gitserverfile,$matched)) {
 				$gitversion = preg_split ( "/\s/", $matched[0]);
