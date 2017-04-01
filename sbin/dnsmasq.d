@@ -1,7 +1,5 @@
 #!/bin/sh
 #
-
-
 # PROVIDE: dnsmasq
 # REQUIRE: SERVERS
 # BEFORE:  DAEMON named
@@ -41,7 +39,15 @@ dnsmasq_conf=${dnsmasq_conf-"${dnsmasq_conf_dir}/${name}.conf"}
 
 : ${dnsmasq_restart="YES"}
 command="/usr/local/sbin/${name}"
-command_args="-x $pidfile -C $dnsmasq_conf"
+
+_sambaad=`/usr/local/bin/xml sel -t -v "count(//sambaad/enable)" /conf/config.xml`
+
+if [ 0 -eq "${_sambaad}" ]; then
+	dnsmasqport=""
+else
+	dnsmasqport="-p 5354"
+fi
+command_args="-x $pidfile -C $dnsmasq_conf ${dnsmasqport}"
 
 reload_pre() {
         if [ "$dnsmasq_conf" -nt "${timestamp}" ] ; then
@@ -68,6 +74,7 @@ timestampconf() {
 
 rmtimestamp() {
         rm -f "${timestamp}"
+		rm -f "${pidfile}"
 }
 
 dnsmasq_mkconf()
@@ -81,8 +88,10 @@ dnsmasq_mkconf()
 	_startaddr=`configxml_get "//dnsmasq/startadr"`
 	_endaddr=`configxml_get "//dnsmasq/endadr"`
 	_leasemax=`configxml_get "//dnsmasq/leasecount"`
+	_leasetime=`configxml_get "//dnsmasq/leasetime"`
 	_logging=`configxml_get "//dnsmasq/logging"`
-	
+	_broadcast=`configxml_get "//dnsmasq/broadcast"`
+
 	cat << EOF > ${dnsmasq_conf}
 # Defaults
 log-facility=/var/log/dnsmasq.log
@@ -101,10 +110,19 @@ listen-address=${_listenadress}
 interface=${_interface}
 dhcp-option=option:router,${_router}
 dhcp-option=42,0.0.0.0
+dhcp-option=28,${_broadcast}
 # Setting over NAS4Free webGUI
-dhcp-range=${_startaddr},${_endaddr},10m
-dhcp-lease-max=${_leasemax}
 EOF
+_noresolv=`/usr/local/bin/xml sel -t -v "count(//dnsmasq/noresolv)" /conf/config.xml`
+
+if [ 0 -ne "${_noresolv}" ]; then
+	echo "no-resolv" >> ${dnsmasq_conf};
+	echo "no-poll" >> ${dnsmasq_conf};
+fi
+if [ -n "${_startaddr}" ] &&  [ -n "${_endaddr}" ] ; then 
+		echo 'dhcp-range=interface:'${_interface}','${_startaddr}','${_endaddr}','${_leasetime}  >> ${dnsmasq_conf}
+		echo 'dhcp-lease-max='${_leasemax}  >> ${dnsmasq_conf}
+fi
 case ${_logging} in
 		all)
 			echo "log-queries" >> ${dnsmasq_conf};
@@ -117,17 +135,17 @@ case ${_logging} in
 			
 			;;
 esac
-xml sel -t \
+/usr/local/bin/xml sel -t \
 	-i "count(//dnsmasq/extconfig) > 0" -o "conf-dir=" -v "//dnsmasq/rootfolder" -o "conf" -n -b \
 	${configxml_file} | /usr/local/bin/xml unesc >> ${dnsmasq_conf}
-xml sel -t \
+/usr/local/bin/xml sel -t \
 	-i "string-length(//dnsmasq/tftpboot) > 3" -o "dhcp-boot=" -v "//dnsmasq/tftpboot" -n -b \
 	${configxml_file} | /usr/local/bin/xml unesc >> ${dnsmasq_conf}
-xml sel -t \
-	-i "count(//dnsmasq/enabletftp) > 0" -o "enable-tftp" -n -b \
+/usr/local/bin/xml sel -t \
+	-i "count(//dnsmasq/enabletftp) > 1" -o "enable-tftp" -n -b \
 	${configxml_file} | /usr/local/bin/xml unesc >> ${dnsmasq_conf}
-#todo - need correct path into php file
-xml sel -t \
+
+/usr/local/bin/xml sel -t \
 	-i "string-length(//dnsmasq/tftproot) > 3" -o "tftp-root=" -v "//dnsmasq/tftproot" -n -b \
 	${configxml_file} | /usr/local/bin/xml unesc >> ${dnsmasq_conf}
 
@@ -140,7 +158,7 @@ while [ ${_index} -gt 0 ]
 	-i "string-length(macaddr) > 3" -v "concat(macaddr,',')" -b \
 	-i "string-length(ipadress) > 3" -v "concat(ipadress,',')" -b \
 	-i "string-length(hostname) > 3" -v "concat(hostname,',')" -b \
-	-i "string-length(leasetime) > 0" -v "leasetime" --else -o "15m" -b -n \
+	-i "string-length(leasetime) > 0" -v "leasetime" -b -n \
 	-b \
 	${configxml_file} | /usr/local/bin/xml unesc >> ${dnsmasq_conf}
 	_index=$(( ${_index} - 1 ))

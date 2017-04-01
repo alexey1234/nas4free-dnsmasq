@@ -5,7 +5,7 @@ Version 0.1
 */
 require("auth.inc");
 require("guiconfig.inc");
-include_once ($config['dnsmasq']['rootfolder']."www/function.inc");
+include_once ($config['dnsmasq']['rootfolder']."dnsmasq/function.inc");
 $pgtitle = array(gettext("Extensions"),gettext("DHCP clients table"));
 include("fbegin.inc");?>
 
@@ -13,7 +13,7 @@ include("fbegin.inc");?>
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
 			<li class="tabinact"><a href="extensions_dnsmasq_server.php"><span>Main</span></a></li>
-			
+			<li class="tabinact"><a href="extensions_dnsmasq_hosts_static.php"><span>Hosts</span></a></li>
 			<li class="tabinact"><a href="extensions_dnsmasq_conf.php"><span>config</span></a></li>
 			<li class="tabact"><a href="extensions_dnsmasq_clients.php"><span>Client table</span></a></li>
 			<li class="tabinact"><a href="extensions_dnsmasq_log.php"><span>Log</span></a></li>

@@ -7,7 +7,7 @@ $rootfolder = $config['dnsmasq']['rootfolder'];
 $dhcphost="";
 // copy part of config in temporary array
 $dnsmasqhosts = $config['dnsmasq']['hosts'];
-$file = "/etc/dnsmasq.conf";
+$file = "/var/etc/dnsmasq.conf";
 $handle=fopen($file, "w+");
 // defaults
 fwrite ($handle, "#Defaults\nlog-facility=/var/log/dnsmasq.log\ndhcp-leasefile=/var/db/dnsmasq.leases\nuser=nobody\ngroup=nobody\ndomain-needed\nbogus-priv\ndomain=local\nexpand-hosts\nlocal=/local/\ndhcp-option=23,50\ndhcp-authoritative\n");
@@ -66,4 +66,22 @@ global $config;
 $subnet = $config['interfaces']['lan']['ipaddr']."/".$config['interfaces']['lan']['subnet'];
 if (TRUE == ($cnid=ip_in_subnet($ipaddr,$subnet)) ) return TRUE; else return FALSE;
 }
-
+function delete_dnsmasqhost ($uuid) {
+	global $config;
+	unset ($configchange);
+	$cnid = array_search_ex($uuid, $config['dnsmasq']['hosts'], "uuid");
+	if (FALSE !== $cnid) {	
+		unset($config['dnsmasq']['hosts'][$cnid]); 	
+		$configchange="1"; 
+		}
+	$hostid = array_search_ex($uuid, $config['system']['hosts'], "uuid");
+	if (FALSE !== $hostid) {
+		unset($config['system']['hosts'][$hostid]);
+		$configchange="1";
+		}
+	if (isset($configchange)) {
+		return true;
+	} else {
+		return false;
+	}
+}
