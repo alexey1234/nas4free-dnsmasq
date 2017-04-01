@@ -1,4 +1,5 @@
 #!/bin/sh
+#Version 0.4
 BRANCHENAME=working
 exerr () { echo -e "$*" >&2 ; exit 1; }
 
