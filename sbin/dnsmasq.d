@@ -120,7 +120,7 @@ if [ 0 -ne "${_noresolv}" ]; then
 	echo "no-poll" >> ${dnsmasq_conf};
 fi
 if [ -n "${_startaddr}" ] &&  [ -n "${_endaddr}" ] ; then 
-		echo 'dhcp-range='${_startaddr}','${_endaddr}','${_leasetime}  >> ${dnsmasq_conf}
+		echo 'dhcp-range=interface:'${_interface}','${_startaddr}','${_endaddr}','${_leasetime}  >> ${dnsmasq_conf}
 		echo 'dhcp-lease-max='${_leasemax}  >> ${dnsmasq_conf}
 fi
 case ${_logging} in
