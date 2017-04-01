@@ -10,7 +10,7 @@ array_sort_key($config['dnsmasq']['hosts'], "hostname");
 $a_hosts = &$config['dnsmasq']['hosts'];
 //if ($_POST)  { print_r($_FILES); }
 if ($_POST['download'])  {
-	$destination_filename = sprintf('dnsmasq_hosts.-%s.%s-%s.config',$config['system']['hostname'],$config['system']['domain'],date('YmdHis'));
+	$destination_filename = sprintf('dnsmasq_hosts-%s.%s-%s.config',$config['system']['hostname'],$config['system']['domain'],date('YmdHis'));
 	$data = serialize($config['dnsmasq']['hosts']);
 	header('Content-Type: application/octet-stream');
 	header(sprintf('Content-Disposition: attachment; filename=%s',$destination_filename));
@@ -29,6 +29,7 @@ if ($_POST['submit']='restore')  {
 		unset($config['dnsmasq']['hosts']);
 		$config['dnsmasq']['hosts'] = $result;
 		write_config();
+		updatenotify_set("dnsmasq", UPDATENOTIFY_MODE_NEW, "restart");
 		header('Header: extensions_dnsmasq_hosts_static.php');
 	}
 }
@@ -61,7 +62,7 @@ $(document).ready(function(){
 
 //-->
 </script>
-<table id="area_navigator"><tbody>
+<table id="area_navigator" width="100%" border="0" cellpadding="0" cellspacing="0"><tbody>
 	<tr><td class="tabnavtbl"><ul id="tabnav">
 				<li class="tabinact"><a href="extensions_dnsmasq_server.php"><span>Main</span></a></li>
 				<li class="tabact"><a href="extensions_dnsmasq_hosts_static.php"><span>Hosts</span></a></li>
@@ -69,12 +70,11 @@ $(document).ready(function(){
 				<li class="tabinact"><a href="extensions_dnsmasq_clients.php"><span>Client table</span></a></li>
 				<li class="tabinact"><a href="extensions_dnsmasq_log.php"><span>Log</span></a></li>
 		</ul></td></tr>
-	</tbody>
-</table>
+	<tr><td class="tabcont">
 <form action="extensions_dnsmasq_hosts_static.php" method="post" name="iform1" id="iform1" enctype="multipart/form-data">
 		<?php if ($input_errors) print_input_errors($input_errors);?>
 		<?php if (updatenotify_exists("dnsmasq")) print_config_change_box();?>
-<table id="area_data">
+<table id="area_data" width="100%" border="0" cellpadding="5" cellspacing="0">
 	<tbody><?php html_titleline(gtext('Hosts')); ?>
 		<tr>
 			<td id="area_data_frame">
@@ -114,31 +114,26 @@ $(document).ready(function(){
 								<a href="extensions_dnsmasq_hosts.php?act=new" class="popup"><img src="images/add.png" title="<?=gettext("Add host");?>" border="0" alt="<?=gettext("Add host");?>" /></a>
 							</td>
 					</tr>
+					
 					</table></td></tr>
 					 
 					<tr>
-			<td><div id="submit">
-					<input name="download" type="submit" class="formbtn"  value="<?=gettext("Download host configuration");?>" />
-					
-				</div>
-			</td>
-			
-			
-		</tr>
-		
-		<tr><td>
-		<div id="submitfile">
-		<strong><font color="red"><?='Select hosts configuration file:';?></strong></font>&nbsp;<input name="conffile" type="file" class="formfld" id="conffile" size="40"/>
-	</div>
-	<div id="submitrestore">
-<?php
-		echo html_button('restore',gtext('Restore Configuration'),'restore');
-?>
-	</div>
-		</td></tr>
+						<td><div id="submit">
+							<input name="download" type="submit" class="formbtn"  value="<?=gettext("Download host configuration");?>" />
+						</div></td>
+					</tr>
+					<tr>
+						<td><div id="submitfile">
+						<strong><font color="red"><?='Select hosts configuration file:';?></strong></font>&nbsp;<input name="conffile" type="file" class="formfld" id="conffile" size="40"/>
+						</div>
+						<div id="submitrestore">
+				<?php 	echo html_button('restore',gtext('Restore Configuration'),'restore'); ?>
+						</div>
+						</td>
+					</tr>
 				</table>
 			</td>
-		</td>
+
 	</tr>
 	</tbody>
 	</table>	
