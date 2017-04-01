@@ -22,12 +22,8 @@ if ($_POST) {
 	if ( $pconfig['Submit'] && $pconfig['Submit'] =="Remove") {
 		
 		// we want to remove dnsmasq
-		array_sort_key($config['rc']['param'], "name");
-		$a_param = &$config['rc']['param'];
-			if (FALSE !== ($parid = array_search_ex("Dnsmasq startup script", $a_param, "name"))) {
-				unset ( $a_param[$parid]);
-				unset ( $config['rc']['param']);
-				$config['rc']['param'] = $a_param;
+		if (FALSE !== ($parid = array_search_ex("Dnsmasq startup script", $config['rc']['param'], "name"))) {
+			unset ( $config['rc']['param'][$parid]);
 			}
 		foreach ( glob( "{$config['dnsmasq']['rootfolder']}conf/ext/dnsmasq/*.php" ) as $file ) {
  			$file = str_replace("{$config['dnsmasq']['rootfolder']}conf/ext/dnsmasq", "/usr/local/www", $file);
