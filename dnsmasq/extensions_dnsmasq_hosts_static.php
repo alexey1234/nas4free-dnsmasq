@@ -57,6 +57,20 @@ $(document).ready(function(){
 		my_hosts = window.open($(this).attr("href"), "popupWindow", "location=0,status=0,scrollbars=0, width=500,height=400");
 		my_hosts.moveTo(100, 400);
 	});
+	$('th').click(function(){
+    var table = $(this).parents('table').eq(0)
+    var rows = table.find('tr:gt(0)').toArray().sort(comparer($(this).index()))
+    this.asc = !this.asc
+    if (!this.asc){rows = rows.reverse()}
+    for (var i = 0; i < rows.length; i++){table.append(rows[i])}
+})
+function comparer(index) {
+    return function(a, b) {
+        var valA = getCellValue(a, index), valB = getCellValue(b, index)
+        return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB)
+    }
+}
+function getCellValue(row, index){ return $(row).children('td').eq(index).html() }
 });
 
 
@@ -79,22 +93,24 @@ $(document).ready(function(){
 		<tr>
 			<td id="area_data_frame">
 								
-				<table width="100%" border="0" cellpadding="6" cellspacing="0">
-				
-									<tr>
-							<td width="35%" class="listhdrlr"><?=gettext("MAC");?></td>
-							<td width="35%" class="listhdrc"><?=gettext("IP");?></td>
-							<td width="10%" class="listhdrc"><?=gettext("hostname");?></td>
-							<td width="10%" class="listhdrc"><?=gettext("Lease time");?></td>
-							<td width="5%" class="listhdrc"></td>
-					</tr>
-		<?php // this line need for analystic from host
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<thead>
+						<tr>
+							<th width="35%" class="listhdrlr"><?=gettext("MAC");?></th>
+							<th width="35%" class="listhdrc"><?=gettext("IP");?></th>
+							<th width="10%" class="listhdrc"><?=gettext("hostname");?></th>
+							<th width="10%" class="listhdrc"><?=gettext("Lease time");?></th>
+							<th width="5%" class="listhdrc"></th>
+						</tr>
+					</thead>	
+					<?php // this line need for analystic from host
 					if (is_array($config['dnsmasq']['hosts'])) {
-							array_sort_key($config['dnsmasq']['hosts'], "hostname");
-							$p_hosts = &$config['dnsmasq']['hosts'];
-							foreach ($p_hosts as $host):?>
+						array_sort_key($config['dnsmasq']['hosts'], "hostname");
+						$p_hosts = &$config['dnsmasq']['hosts'];
+						foreach ($p_hosts as $host):?>
 					<?php $notificationmode = updatenotify_get_mode("dnsmasq", $host['uuid']);?>		
-					<tr>
+					<tbody>
+						<tr>
 							<td class="listr"><?=htmlspecialchars ( $host['macaddr']);?></td>
 							<td  class="listr"><?=htmlspecialchars($host['ipadress']);?></td>
 							<td  class="listr"><?=htmlspecialchars($host['hostname']);?></td>					
@@ -105,17 +121,20 @@ $(document).ready(function(){
 								<a href="extensions_dnsmasq_hosts.php?act=del&amp;uuid=<?=$host['uuid'];?>" class="popup" onclick="return confirm('<?=gettext("Do you really want to delete this entry?");?>')"><img src="images/delete.png" title="<?=gettext("Delete host");?>" border="0" alt="<?=gettext("Delete host");?>" /></a>
 							</td>	
 					<?php else:?>									
-					</tr>
+						</tr>
 					<?php endif;?>
 					<?php endforeach; } ?>
-					<tr>
-							<td class="list" colspan="7"></td>
+					</tbody>
+				</table>
+				<table width="100%" border="0" cellpadding="6" cellspacing="0">	
+					<tr><td width="35%" ></td><td width="35%" ></td><td width="10%" ></td><td width="10%" ></td><td width="5%" ></td>
+						
 							<td class="list">
 								<a href="extensions_dnsmasq_hosts.php?act=new" class="popup"><img src="images/add.png" title="<?=gettext("Add host");?>" border="0" alt="<?=gettext("Add host");?>" /></a>
 							</td>
 					</tr>
 					
-					</table></td></tr>
+				</table></td></tr>
 					 
 					<tr>
 						<td><div id="submit">
