@@ -99,8 +99,8 @@ function getCellValue(row, index){ return $(row).children('td').eq(index).html()
 							<th width="35%" class="listhdrlr"><?=gettext("MAC");?></th>
 							<th width="35%" class="listhdrc"><?=gettext("IP");?></th>
 							<th width="10%" class="listhdrc"><?=gettext("hostname");?></th>
-							<th width="10%" class="listhdrc"><?=gettext("Lease time");?></th>
-							<th width="5%" class="listhdrc"></th>
+							<td width="10%" class="listhdrc"><?=gettext("Lease time");?></td>
+							<td width="5%" class="listhdrc"></td>
 						</tr>
 					</thead>	
 					<?php // this line need for analystic from host
