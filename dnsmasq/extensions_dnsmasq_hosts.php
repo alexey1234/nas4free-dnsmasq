@@ -28,8 +28,7 @@ if (isset($_GET) && $_GET['act'] == "new") {
 	$pconfig['uuid'] = uuid();
 	$pconfig['macaddr'] = "";
 	$pconfig['ipadress'] = "";
-	$pconfig['hostname'] = "";
-	$pconfig['leasetime'] = "";
+	$pconfig['hostname'] = "";	
 	$pconfig['act'] = "new";
 }
 if (isset($_GET) && $_GET['act'] == "edit") {
@@ -38,10 +37,7 @@ if (isset($_GET) && $_GET['act'] == "edit") {
 	$pconfig['act'] = "edit";
 	$pconfig['macaddr'] = $config['dnsmasq']['hosts'][$cnid]['macaddr'];
 	$pconfig['ipadress'] = $config['dnsmasq']['hosts'][$cnid]['ipadress'];
-	$pconfig['hostname'] = $config['dnsmasq']['hosts'][$cnid]['hostname'];
-	$pconfig['leasetime'] = $config['dnsmasq']['hosts'][$cnid]['leasetime'];
-	
-	
+	$pconfig['hostname'] = $config['dnsmasq']['hosts'][$cnid]['hostname'];	
 }
 }
 if (isset($_GET) && $_GET['act'] == "del") {
@@ -52,10 +48,6 @@ if (isset($_GET) && $_GET['act'] == "del") {
 	echo "<script>window.opener.location.reload(); window.close();</script>";
 }
 if ($_POST) {
-	if ( isset($_POST['cancel']))  {
-		echo "<script>window.close();</script>";
-		exit;
-	}
 	unset ($input_errors);
 	
 	$pconfig = $_POST;
@@ -123,8 +115,7 @@ if ($_POST) {
 		
 	$hosts['macaddr'] = $pconfig['macaddr'];
 	$hosts['ipadress'] = $pconfig['ipadress'];
-	$hosts['hostname'] = $pconfig['hostname'];
-	$hosts['leasetime'] = "infinity";
+	$hosts['hostname'] = $pconfig['hostname'];	
 	if (isset($_POST['uuid']) && (FALSE !== $cnid)) { 
 		$config['dnsmasq']['hosts'][$cnid] = $hosts; 
 		$mode = UPDATENOTIFY_MODE_MODIFIED; 
@@ -187,14 +178,11 @@ header("Content-Type: text/html; charset=" . system_get_language_codeset());
 				</tr>
 				<tr>
 					<td><input type="submit" name="submit" value="Save" />
-						<input type="submit" name="cancel" value="Cancel" />
+						<button onclick="window.close();">Cancel</button>
 						<input name="uuid" type="hidden" value="<?php echo $pconfig['uuid']; ?>" />
 						<input name="act" type="hidden" value="<?php echo $pconfig['act']; ?>" />
 					</td>
-					
-				</tr>
-			
-			
+				</tr>	
 			<?php include 'formend.inc'; ?>
 			</form>	</td></tr></tbody>
 			</table>

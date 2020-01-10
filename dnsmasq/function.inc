@@ -43,7 +43,7 @@ foreach ($dnsmasqhosts as $out_hosts ) {
 		      else { $dhcphost = "dhcp-host=".$out_hosts['macaddr']; 
 			      if (!empty($out_hosts['ipadress'])) $dhcphost = $dhcphost.",".$out_hosts['ipadress']; else $dhcphost = $dhcphost;
 			      if (!empty($out_hosts['hostname'])) $dhcphost = $dhcphost.",".$out_hosts['hostname']; else $dhcphost = $dhcphost;
-			      $dhcphost = $dhcphost.",".$out_hosts['leasetime']; } }
+			      $dhcphost = $dhcphost.",infinite"; } }
 	  else  $dhcphost = "dhcp-host=".$out_hosts['hostname']; 
 fwrite($handle,$dhcphost."\n");
 }

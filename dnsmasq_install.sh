@@ -1,5 +1,6 @@
 #!/bin/sh
-#Version 0.41
+#Version 0.42
+# With ntpd support
 
 . /etc/rc.subr
 . /etc/util.subr

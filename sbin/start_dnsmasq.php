@@ -19,6 +19,11 @@ if (!is_link( "/usr/local/www/extensions_dnsmasq_server.php") ) symlink ( "/usr/
 if (!is_link( "/usr/local/www/extensions_dnsmasq_hosts.php") ) symlink ( "/usr/local/www/ext/dnsmasq/extensions_dnsmasq_hosts.php","/usr/local/www/extensions_dnsmasq_hosts.php");else {}
 if (!is_link( "/usr/local/www/extensions_dnsmasq_conf.php") ) symlink ( "/usr/local/www/ext/dnsmasq/extensions_dnsmasq_conf.php","/usr/local/www/extensions_dnsmasq_conf.php"); else {}
 if (!is_link( "/usr/local/www/extensions_dnsmasq_hosts_static.php") ) symlink ( "/usr/local/www/ext/dnsmasq/extensions_dnsmasq_hosts_static.php","/usr/local/www/extensions_dnsmasq_hosts_static.php"); else {}
+if (!is_link( "/etc/rc.d/ntpd") ) symlink ( $config['dnsmasq']['rootfolder']."sbin/ntpd","/etc/rc.d/ntpd"); else {}
+if (!is_link( "/etc/ntp/leap-seconds") ) symlink ( $config['dnsmasq']['rootfolder']."sbin/leap-seconds","/etc/ntp/leap-seconds"); else {}
+if (!is_link( "/etc/ntp.conf") ) symlink ( $config['dnsmasq']['rootfolder']."sbin/ntp.conf","/etc/ntp.conf"); else {}
+if (!is_dir ("/etc/ntp/stats")) mkdir ("/etc/ntp/stats");
+
 if (isset($config['dnsmasq']['enable']) ) {
 	rc_update_rcconf ("dnsmasq","enable"); rc_start_service("dnsmasq");
 	} else {

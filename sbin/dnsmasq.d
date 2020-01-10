@@ -109,10 +109,17 @@ dhcp-authoritative
 listen-address=${_listenadress}
 interface=${_interface}
 dhcp-option=option:router,${_router}
-dhcp-option=42,0.0.0.0
 dhcp-option=28,${_broadcast}
 # Setting over NAS4Free webGUI
 EOF
+_ntpd_enable=`/usr/local/bin/xml sel -t -v "count(//dnsmasq/enablentp)" /conf/config.xml`
+if [ 0 -ne "${_ntpd_enable}" ]; then
+	echo "dhcp-option=42,0.0.0.0" >> ${dnsmasq_conf};
+	rconf service enable ntpd
+	rconf service enable ntpd_sync_on_start
+	rconf service disable ntpdate
+	/usr/sbin/service ntpd start
+fi
 _noresolv=`/usr/local/bin/xml sel -t -v "count(//dnsmasq/noresolv)" /conf/config.xml`
 
 if [ 0 -ne "${_noresolv}" ]; then
@@ -158,7 +165,7 @@ while [ ${_index} -gt 0 ]
 	-i "string-length(macaddr) > 3" -v "concat(macaddr,',')" -b \
 	-i "string-length(ipadress) > 3" -v "concat(ipadress,',')" -b \
 	-i "string-length(hostname) > 3" -v "concat(hostname,',')" -b \
-	-i "string-length(leasetime) > 0" -v "leasetime" -b -n \
+	-o "infinity" -n \
 	-b \
 	${configxml_file} | /usr/local/bin/xml unesc >> ${dnsmasq_conf}
 	_index=$(( ${_index} - 1 ))

@@ -98,8 +98,7 @@ function getCellValue(row, index){ return $(row).children('td').eq(index).html()
 						<tr>
 							<th width="35%" class="listhdrlr"><?=gettext("MAC");?></th>
 							<th width="35%" class="listhdrc"><?=gettext("IP");?></th>
-							<th width="10%" class="listhdrc"><?=gettext("hostname");?></th>
-							<td width="10%" class="listhdrc"><?=gettext("Lease time");?></td>
+							<th width="20%" class="listhdrc"><?=gettext("hostname");?></th>
 							<td width="5%" class="listhdrc"></td>
 						</tr>
 					</thead>	
@@ -114,7 +113,6 @@ function getCellValue(row, index){ return $(row).children('td').eq(index).html()
 							<td class="listr"><?=htmlspecialchars ( $host['macaddr']);?></td>
 							<td  class="listr"><?=htmlspecialchars($host['ipadress']);?></td>
 							<td  class="listr"><?=htmlspecialchars($host['hostname']);?></td>					
-							<td  class="listrd">infinity</td>
 					<?php if (UPDATENOTIFY_MODE_DIRTY != $notificationmode):?>
 							<td valign="middle" nowrap="nowrap" class="list">
 								<a href="extensions_dnsmasq_hosts.php?act=edit&amp;uuid=<?=$host['uuid'];?>" class="popup" ><img src="images/edit.png" title="<?=gettext("Edit host");?>" border="0" alt="<?=gettext("Edit host");?>" /></a>&nbsp;

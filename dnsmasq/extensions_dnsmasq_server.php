@@ -22,7 +22,7 @@ $pconfig['enabletftp'] = $config['dnsmasq']['enabletftp'];
 $pconfig['tftproot1'] = $config['dnsmasq']['tftproot'];
 $pconfig['tftproot2'] = $config['dnsmasq']['tftproot'];
 $pconfig['tftpboot'] = $config['dnsmasq']['tftpboot'];
-
+$pconfig['enablentp'] = isset($config['dnsmasq']['enablentp']) ? true : false;
 if (is_ajax()) {
 	$extentionstatus['status'] = 0;
 	if (is_file("/var/run/dnsmasq.stamp")) $extentionstatus['status'] = 1;
@@ -66,6 +66,43 @@ if ($_POST) {
 			if (is_ipaddr ($_POST['broadcast'])) { 
 				if (false == ($cnif =ip_in_subnet($_POST['broadcast'],$subnet))) {$input_errors[] = "Value \"Broadcast address\" is not belongs to the subnet LAN"; goto out;} else {} }
 				}
+				
+			unset ($timeserverip);
+			if ("ntpd" == $_POST['enablentp']) :
+				if (empty($_POST['ntpd_timeservers'])):
+					$input_errors[] = gtext("A NTP  server name may be defined");
+				else:
+					$ntpd_timeservers = explode (" ",$_POST['ntpd_timeservers']);
+					foreach ($ntpd_timeservers as $ts) :
+						if(!is_domain($ts)):
+							$input_errors[] = gtext("A NTP server name may only contain the following characters: a-z, 0-9, '-' and '.'.");
+						else:
+							$ts_ip = gethostbyname ( $ts );
+							if(!is_ipaddr($ts_ip)):
+								$input_errors[] = "Defined host {$ts} not valid.  Please use other";
+							else:
+								$timeserverip[] = $ts_ip;
+							endif;
+						endif;
+					endforeach;
+				endif;
+			endif;
+			if ("ntpdate" == $_POST['enablentp']) :
+				$ntpd_timeservers = explode (" ",$config['system']['ntp']['timeservers']);
+				foreach ($ntpd_timeservers as $ts) :
+					if(!is_domain($ts)):
+						$input_errors[] = gtext("A NTP time server name may only contain the following characters: a-z, 0-9, '-' and '.'.");
+					else:
+						$ts_ip = gethostbyname ( $ts );
+						if(!is_ipaddr($ts_ip)):
+							$input_errors[] = "Defined host {$ts} not valid.  Please use other";
+						else:
+							$timeserverip[] = $ts_ip;
+						endif;
+					endif;
+					
+				endforeach;
+			endif;
 			if (empty($input_errors)) { 
 				if ( isset($_POST['startadr']) &&  ($_POST['endadr'])) {
 					$config['dnsmasq']['startadr'] =$_POST['startadr']; 
@@ -98,7 +135,20 @@ if ($_POST) {
 								unset ( $config['dnsmasq']['tftpboot']);} ;
 							break;
 					}
+				if (isset ($_POST['enablentp'])){
+					$config['dnsmasq']['enablentp'] = true;
+					// Disable ntpdate
+					if (isset($config['system']['ntp']['enable'])) {
+						$config['system']['ntp']['enable'] = false;
+						rc_update_rcconf("ntpdate", "disable");
+					}
+				} else {
+					unset ($config['dnsmasq']['enablentp']);
+					if (isset($config['system']['ntp']['enable'])) rc_update_rcconf("ntpdate", "enable");
+				}
 			write_config();
+			
+			rc_restart_service("cron");
 			$pconfig['enable'] = isset($config['dnsmasq']['enable']) ? true : false;
 			$pconfig['extconfig'] = isset ($config['dnsmasq']['extconfig']) ? true : false;
 			$pconfig['logging'] = $config['dnsmasq']['logging'];
@@ -112,16 +162,27 @@ if ($_POST) {
 			$pconfig['tftproot1'] = $config['dnsmasq']['tftproot'];
 			$pconfig['tftproot2'] = $config['dnsmasq']['tftproot'];
 			$pconfig['tftpboot'] = $config['dnsmasq']['tftpboot'];
+			$pconfig['enablentp'] = isset($config['dnsmasq']['enablentp']) ? true : false;
 			  // restart dnsmasq  
 			if (isset ($config['dnsmasq']['enable'])) { 
 					$savemsg = ""; 
-					$warnmess =""; 
+					$warnmess ="";
+					if (isset ($config['dnsmasq']['enablentp'])):
+						rc_update_rcconf("ntpd", "enable"); 
+						rc_update_rcconf("ntpd_sync_on_start","enable");
+						rc_restart_service("ntpd");
+					else:
+						rc_stop_service("ntpd");
+						rc_update_rcconf("ntpd", "disable");
+						rc_update_rcconf("ntpd_sync_on_start","disable");
+					endif;
 					rc_update_rcconf("dnsmasq", "enable"); 
-					rc_restart_service("dnsmasq");	
+					rc_restart_service("dnsmasq");
 				}	else { 	
 					$savemsg = ""; 
 					$warnmess =""; 
 					rc_stop_service("dnsmasq");
+					rc_stop_service("ntpd");
 				}
 			}
 	}
@@ -143,7 +204,7 @@ $pgtitle = array(gettext("Extensions"),gettext("DNSMASQ"));
 include("fbegin.inc");?>
 
 <script type="text/javascript">
-<!--
+//<![CDATA[
 $(document).ready(function(){
 	var gui = new GUI;
 	gui.recall(500, 2000, 'extensions_dnsmasq_server.php', null, function(data) {
@@ -178,7 +239,7 @@ function enable_tftp() {
 			break;
 	}
 }
-//-->
+//]]>
 </script>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr><td class="tabnavtbl">
@@ -215,6 +276,17 @@ function enable_tftp() {
 		if (isset ($config['tftpd']['enable'])) $message = gettext("Use tftp root folder"); else $message = "<b> TFTPd must be enabled!</b>";
 		html_inputbox("tftproot1", gettext("TFTP root folder"), $config['tftpd']['dir'], $message, true, 60,true );?>
 		<?php html_inputbox("tftpboot", gettext("Boot kernel name"), $pconfig['tftpboot'], gettext("Define first boot kernel name"), true, 60,false);?>
+		<?php html_separator(); ?>
+		<?php html_checkbox("enablentp", gettext("NTP server"), $pconfig['enablentp'], "Check this when you want use Xigmanas as time server for your network", "", "", "" );?>
+			
+		<?php /*
+		html_checkbox2('ntpd_enable',gettext('Enable NTPd'),!empty($pconfig['ntpd_enable']) ? true : false,gettext('You can enable NTPd service for serve network time for local network. Other devices will receive time from this server.'),"","","","ntpd_change(false)" );
+		html_inputbox2('ntpd_timeservers',gettext('NTP Time Server'),$pconfig['ntpd_timeservers'],gettext('Use a space to separate multiple hosts (only one required). Remember to set up at least one DNS server if you enter a host name here!'),true,40);
+		html_inputbox2('ntpd_updateinterval',gettext('Time Synchronization'),$pconfig['ntpd_updateinterval'],gettext('Minutes between the next network time synchronization.'),true,20);
+		*/
+		?>
+		
+		
 		<tr>
 			<td><div id="submit">
 					<input name="Submit" type="submit" class="formbtn" value="<?=gettext("Save");?>" />
@@ -228,8 +300,8 @@ function enable_tftp() {
 	</tr>
 </table>
 <script type="text/javascript">
-<!--
+//<![CDATA[
 enable_tftp();
-//-->
+//]]>
 </script>
 <?php include("fend.inc"); ?>
